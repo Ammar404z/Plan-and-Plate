@@ -28,11 +28,15 @@ Follow these instructions to set up and run the project locally.
    ```bash
    git clone https://github.tik.uni-stuttgart.de/iste-sopra-2024-aeb/team-13.git
    cd team-13
-   
-2. **Install Axios for Frontend**
+
+3. **Install Node.js and npm**
+
+
+2. **Install Axios**
    ```bash
-   cd frontend 
+   cd frontend
    npm install axios
+
    
    
 ## Running the Backend (Spring Boot)
@@ -66,19 +70,11 @@ Follow these instructions to set up and run the project locally.
  ## Usage
  
  1. Access The Application:
+ 
     	•	Open a browser and go to http://localhost:8081.
       •	The frontend sends a request to the backend, which fetches data from TheMealDB API and returns it to be displayed.
       
  2.	Search for Recipes:
+
 	•	Type a recipe name (e.g., “pizza” or “pasta”) in the search bar.
 	•	The frontend sends a request to the backend, which fetches data from TheMealDB API and returns it to be displayed.
-     
-
-
-
-
-    
-
-   
-   
-   
