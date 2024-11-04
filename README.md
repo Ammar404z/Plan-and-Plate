@@ -29,10 +29,13 @@ Follow these instructions to set up and run the project locally.
    git clone https://github.tik.uni-stuttgart.de/iste-sopra-2024-aeb/team-13.git
    cd team-13
 
+2. **Install Java 17 or higher**
+
 3. **Install Node.js and npm**
 
+4. **Install Maven**
 
-2. **Install Axios**
+5. **Install Axios**
    ```bash
    cd frontend
    npm install axios
