@@ -8,8 +8,10 @@ module.exports = defineConfig({
     headers: {
       'Access-Control-Allow-Origin': '*',
     },
-    // Disable Hot Module Replacement (HMR)
-    hot: false,
-    liveReload: false,
+    hot: false,           // Disable Hot Module Replacement
+    liveReload: false,    // Disable Live Reload
+    client: {
+      webSocketURL: 'ws://193.196.52.222:8081/ws',
+    },
   },
 });
