@@ -18,7 +18,7 @@ public class BackendApplication {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("http://localhost:8081");
+                registry.addMapping("/**").allowedOrigins("http://localhost:8081", "http://193.196.52.222:8081");
             }
         };
     }
