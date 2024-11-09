@@ -38,7 +38,7 @@ export default {
     async searchMeals() {
       if (this.query) {
         try {
-          const response = await axios.get(`http://localhost:8080/api/meals/search`, {
+          const response = await axios.get(`${process.env.VUE_APP_API_BASE_URL}/api/meals/search`, {
             params: { name: this.query }
           });
           this.meals = response.data.meals || [];
