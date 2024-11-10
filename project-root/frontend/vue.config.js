@@ -3,7 +3,7 @@ const { defineConfig } = require('@vue/cli-service');
 module.exports = defineConfig({
   transpileDependencies: true,
   devServer: {
-    port: 8083,
+    port: 8081,
     host: '::',  // Allow both IPv4 and IPv6 access
     headers: {
       'Access-Control-Allow-Origin': '*',
