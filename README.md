@@ -51,7 +51,7 @@ A script has been provided to start both the frontend and backend servers in sep
 
 1. **Run the Start Script**:
    ```bash
-   ´./start.sh´
+   ./start.sh```
 
    (this has already been done previously, no need to run the script again, do this only if the Application has not been started yet)
 
