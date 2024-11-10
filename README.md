@@ -85,6 +85,7 @@ A script has been provided to start both the frontend and backend servers in sep
  
     	•	Open a browser and go to http://[2001:7c0:2320:1:f816:3eff:fe09:d4aa]:8081/
       •	The frontend sends a request to the backend, which fetches data from TheMealDB API and returns it to be displayed.
+      • the Project should already be running on the vm so you just have to paste the link above in your browser
       
  2.	**Search for Recipes**:
 
