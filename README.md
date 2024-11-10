@@ -23,7 +23,7 @@ Follow these instructions to set up and run the project on a VM.
 - **Axios** (for HTTP requests in the frontend)
 - **Git** (optional, for cloning the project)
 
-(everything here is already installed on the vm, so u can skip the Installation steps)
+(everything here is already installed on the vm, so you can skip the Installation steps)
 
 ## Installation
 
@@ -51,7 +51,7 @@ A script has been provided to start both the frontend and backend servers in sep
 
 1. **Run the Start Script**:
    ```bash
-   ./start.sh
+   `./start.sh`
 
    (this has already been done previously, no need to run the script again, do this only if the Application has not been started yet)
 
@@ -72,7 +72,7 @@ A script has been provided to start both the frontend and backend servers in sep
    ./stop.sh
 
    this script will :
-   
+
    - Stop the frontend server in the "frontend" screen session.
    - Stop the backend server in the "backend" screen session.
 
