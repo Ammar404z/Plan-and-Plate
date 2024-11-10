@@ -70,6 +70,7 @@ A script has been provided to start both the frontend and backend servers in sep
  1. **Run the Stop Script**:
    ```bash
    ./stop.sh
+   ```
 
    this script will :
 
@@ -80,12 +81,12 @@ A script has been provided to start both the frontend and backend servers in sep
  
  ## Usage
  
- 1. Access The Application:
+ 1. **Access The Application**:
  
     	•	Open a browser and go to http://[2001:7c0:2320:1:f816:3eff:fe09:d4aa]:8081/
       •	The frontend sends a request to the backend, which fetches data from TheMealDB API and returns it to be displayed.
       
- 2.	Search for Recipes:
+ 2.	**Search for Recipes**:
 
 	•	Type a recipe name (e.g., “pizza” or “pasta”) in the search bar.
 	•	The frontend sends a request to the backend, which fetches data from TheMealDB API and returns it to be displayed.
