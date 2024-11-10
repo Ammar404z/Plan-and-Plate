@@ -6,13 +6,14 @@ This project is a full-stack recipe search application that allows users to sear
 - [Getting Started](#getting-started)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
-- [Running the Backend (Spring Boot)](#running-the-backend-spring-boot)
-- [Running the Frontend (Vue.js)](#running-the-frontend-vuejs)
+- [Running the Application](#running-the-application)
+- [Stopping the Application](#stopping-the-application)
+- [Accessing the Application](#acessing-the-application)
 - [Usage](#usage)
 
 ## Getting Started
 
-Follow these instructions to set up and run the project locally.
+Follow these instructions to set up and run the project on a VM.
 
 ### Prerequisites
 
@@ -21,6 +22,8 @@ Follow these instructions to set up and run the project locally.
 - **Node.js and npm** (for frontend dependencies)
 - **Axios** (for HTTP requests in the frontend)
 - **Git** (optional, for cloning the project)
+
+(everything here is already installed on the vm, so u can scip the Installation steps)
 
 ## Installation
 
@@ -42,39 +45,38 @@ Follow these instructions to set up and run the project locally.
 
    
    
-## Running the Backend (Spring Boot)
+## Running the Application
 
-1. **Navigate to the backend directory**:
+A script has been provided to start both the frontend and backend servers in separate screen session:
+
+1. **Run the Start Script**:
    ```bash
-   cd backend
+   ./start.sh
+   (this has already been done previously, no need to run the script again, do this only if the Application has not been started yet)
    
-2. **Build and Start the Application**:
-   ```bash
-   mvn spring-boot:run
-   
-   The backend server should start at http://localhost:8080.
-   
- ## Running the frontend (Vue.js)
+   this script will :
+   - Navigate to the frontend directory, install dependencies, and start the frontend server in a screen session named "frontend."
+   - Navigate to the backend directory, install dependencies, and start the Spring Boot application server in a screen session named "backend."
+
+
+ ## Stopping the Application
  
- 1. **Navigate to the frontend directory**:
-    ```bash
-    cd ../frontend
-    
- 2. **Install Dependencies (if not done previously)**:
-    ```bash
-    npm install
-    
- 3. **Start the Vue Development Server**:
-    ```bash
-    npm run serve
-    
-    The frontend should start on http://localhost:8081.
+ A stop script has also been provided to stop both the frontend and backend screen sessions.
+
+ 1. **Run the Stop Script**:
+   ```bash
+   ./stop.sh
+
+   this script will :
+   - Stop the frontend server in the "frontend" screen session.
+   - Stop the backend server in the "backend" screen session.
+
  
  ## Usage
  
  1. Access The Application:
  
-    	•	Open a browser and go to http://localhost:8081.
+    	•	Open a browser and go to http://[2001:7c0:2320:1:f816:3eff:fe09:d4aa]:8081/
       •	The frontend sends a request to the backend, which fetches data from TheMealDB API and returns it to be displayed.
       
  2.	Search for Recipes:
