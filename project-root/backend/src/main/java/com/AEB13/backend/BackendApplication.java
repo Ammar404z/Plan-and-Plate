@@ -20,8 +20,8 @@ public class BackendApplication {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                            "http://localhost:8083",                    // Localhost for development
-                            "http://[2001:7c0:2320:1:f816:3eff:fe09:d4aa]:8083" //  VM's IPv6 address for external access
+                            "http://localhost:8081",                    // Localhost for development
+                            "http://[2001:7c0:2320:1:f816:3eff:fe09:d4aa]:8081" //  VM's IPv6 address for external access
                         )
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")

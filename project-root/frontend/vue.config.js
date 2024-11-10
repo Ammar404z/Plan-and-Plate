@@ -11,7 +11,7 @@ module.exports = defineConfig({
     hot: false,           // Disable Hot Module Replacement
     liveReload: false,    // Disable Live Reload
     client: {
-      webSocketURL: 'ws://[2001:7c0:2320:1:f816:3eff:fe09:d4aa]:8083/ws',  // Use IPv6 with brackets
+      webSocketURL: 'ws://[2001:7c0:2320:1:f816:3eff:fe09:d4aa]:8081/ws',  // Use IPv6 with brackets
     },
   },
 });
