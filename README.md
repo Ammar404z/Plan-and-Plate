@@ -23,7 +23,7 @@ Follow these instructions to set up and run the project on a VM.
 - **Axios** (for HTTP requests in the frontend)
 - **Git** (optional, for cloning the project)
 
-(everything here is already installed on the vm, so u can scip the Installation steps)
+(everything here is already installed on the vm, so u can skip the Installation steps)
 
 ## Installation
 
@@ -52,11 +52,15 @@ A script has been provided to start both the frontend and backend servers in sep
 1. **Run the Start Script**:
    ```bash
    ./start.sh
+
    (this has already been done previously, no need to run the script again, do this only if the Application has not been started yet)
-   
+
    this script will :
+
    - Navigate to the frontend directory, install dependencies, and start the frontend server in a screen session named "frontend."
    - Navigate to the backend directory, install dependencies, and start the Spring Boot application server in a screen session named "backend."
+
+   *note that u have to be in the project-root directory to be able to run the script*
 
 
  ## Stopping the Application
@@ -68,9 +72,11 @@ A script has been provided to start both the frontend and backend servers in sep
    ./stop.sh
 
    this script will :
+   
    - Stop the frontend server in the "frontend" screen session.
    - Stop the backend server in the "backend" screen session.
 
+   *note that you have to be in the project-root directory to be able to run the script*
  
  ## Usage
  
