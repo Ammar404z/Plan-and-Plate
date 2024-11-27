@@ -7,31 +7,37 @@
       @input="searchMeals"
       class="search-input"
     />
-    
+
     <!-- Wrapper element with v-if applied -->
     <div v-if="meals.length > 0" class="results">
       <div class="meal-card" v-for="meal in meals" :key="meal.idMeal">
         <img :src="meal.strMealThumb" alt="Meal Image" class="meal-image" />
         <div class="meal-info">
           <h3 class="meal-title">{{ meal.strMeal }}</h3>
-          <p class="meal-instructions">{{ meal.strInstructions.substring(0, 100) }}...</p>
+          <p class="meal-instructions">
+            {{ meal.strInstructions.substring(0, 100) }}...
+          </p>
+          <!-- Save Recipe Button -->
+          <button @click="saveRecipe(meal)">Save Recipe</button>
         </div>
       </div>
     </div>
-    
+
     <!-- Show "No results found" if query is entered and no meals are found -->
-    <p v-else-if="query && meals.length === 0" class="no-results">No results found.</p>
+    <p v-else-if="query && meals.length === 0" class="no-results">
+      No results found.
+    </p>
   </div>
 </template>
 
 <script>
-import api from '@/api'; // Import the Axios instance from api.js
+import api from "@/api"; // Import the Axios instance from api.js
 
 export default {
   data() {
     return {
-      query: '',
-      meals: []
+      query: "",
+      meals: [],
     };
   },
   methods: {
@@ -39,7 +45,7 @@ export default {
       if (this.query) {
         try {
           const response = await api.get(`/api/meals/search`, {
-            params: { name: this.query }
+            params: { name: this.query },
           });
           this.meals = response.data.meals || [];
         } catch (error) {
@@ -48,8 +54,37 @@ export default {
       } else {
         this.meals = [];
       }
-    }
-  }
+    },
+
+    extractIngredients(meal) {
+      const ingredients = [];
+      for (let i = 1; i <= 20; i++) {
+        const ingredient = meal[`strIngredient${i}`];
+        const measure = meal[`strMeasure${i}`];
+        if (ingredient && ingredient.trim() !== "") {
+          ingredients.push(`${ingredient} - ${measure || "as needed"}`);
+        }
+      }
+      return ingredients.join(", "); // Combine ingredients into a string
+    },
+
+    async saveRecipe(meal) {
+      const recipe = {
+        name: meal.strMeal || "Unnamed Recipe",
+        ingredients: this.extractIngredients(meal),
+        instructions: meal.strInstructions,
+        thumbnail: meal.strMealThumb,
+      };
+      console.log("Payload being sent:", recipe); // Debug log
+
+      try {
+        const response = await api.post("/api/meals/add", recipe);
+        alert(`Recipe "${response.data.name}" saved successfully.`);
+      } catch (error) {
+        console.error("Error saving recipe:", error);
+      }
+    },
+  },
 };
 </script>
 
