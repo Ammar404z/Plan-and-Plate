@@ -30,62 +30,66 @@
   </div>
 </template>
 
-<script>
-import api from "@/api"; // Import the Axios instance from api.js
+<script setup lang="ts">
+import api from "@/api";
+import { ref } from "vue";
 
-export default {
-  data() {
-    return {
-      query: "",
-      meals: [],
-    };
-  },
-  methods: {
-    async searchMeals() {
-      if (this.query) {
-        try {
-          const response = await api.get(`/api/meals/search`, {
-            params: { name: this.query },
-          });
-          this.meals = response.data.meals || [];
-        } catch (error) {
-          console.error("Error fetching meals:", error);
-        }
-      } else {
-        this.meals = [];
-      }
-    },
+//Define the structure of a Meal from TheMealDB API
+interface Meal {
+  idMeal: string;
+  strMeal: string;
+  strMealThumb: string;
+  strInstructions: string;
+  [key: string]: any; // we do this to allow dynamic ingredient keys like strIngredient1, strMeasure1, etc...
+}
 
-    extractIngredients(meal) {
-      const ingredients = [];
-      for (let i = 1; i <= 20; i++) {
-        const ingredient = meal[`strIngredient${i}`];
-        const measure = meal[`strMeasure${i}`];
-        if (ingredient && ingredient.trim() !== "") {
-          ingredients.push(`${ingredient} - ${measure || "as needed"}`);
-        }
-      }
-      return ingredients.join(", "); // Combine ingredients into a string
-    },
+const query = ref("");
+const meals = ref<Meal[]>([]);
 
-    async saveRecipe(meal) {
-      const recipe = {
-        name: meal.strMeal || "Unnamed Recipe",
-        ingredients: this.extractIngredients(meal),
-        instructions: meal.strInstructions,
-        thumbnail: meal.strMealThumb,
-      };
-      console.log("Payload being sent:", recipe); // Debug log
+async function searchMeals() {
+  if (query.value) {
+    try {
+      const response = await api.get("/api/meals/search", {
+        params: { name: query.value },
+      });
+      meals.value = response.data.meals || [];
+    } catch (error) {
+      console.error("Error fetching meals:", error);
+    }
+  } else {
+    meals.value = [];
+  }
+}
 
-      try {
-        const response = await api.post("/api/meals/add", recipe);
-        alert(`Recipe "${response.data.name}" saved successfully.`);
-      } catch (error) {
-        console.error("Error saving recipe:", error);
-      }
-    },
-  },
-};
+function extractIngredients(meal: Meal): string {
+  const ingredients: string[] = [];
+  for (let i = 1; i <= 20; i++) {
+    const ingredient = meal[`strIngredient${i}`];
+    const measure = meal[`strMeasure${i}`];
+    if (ingredient && ingredient.trim() !== "") {
+      ingredients.push(`${ingredient} - ${measure || "as needed"}`);
+    }
+  }
+  return ingredients.join(", ");
+}
+
+async function saveRecipe(meal: Meal) {
+  const recipe = {
+    name: meal.strMeal || "Unnamed Recipe",
+    ingredients: extractIngredients(meal),
+    instructions: meal.strInstructions,
+    thumbnail: meal.strMealThumb,
+  };
+
+  console.log("Payload being sent:", recipe); // Debug log
+
+  try {
+    const response = await api.post("/api/meals/add", recipe);
+    alert(`Recipe "${response.data.name}" saved successfully.`);
+  } catch (error) {
+    console.error("Error saving recipe:", error);
+  }
+}
 </script>
 
 <style scoped>

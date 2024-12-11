@@ -1,7 +1,7 @@
 <template>
   <div class="saved-meals">
     <h1>Your Saved Meals</h1>
-    <ul v-if="meals.length > 0">
+    <ul v-if="meals.length > 0" class="meal-list">
       <li v-for="meal in meals" :key="meal.id" class="meal-card">
         <img :src="meal.thumbnail" alt="Meal Thumbnail" class="meal-image" />
         <div class="meal-info">
@@ -12,44 +12,51 @@
         </div>
       </li>
     </ul>
-    <p v-else>No meals saved yet.</p>
+    <p v-else class="no-results">No meals saved yet.</p>
   </div>
 </template>
 
-<script>
+<script setup lang="ts">
 import api from "@/api";
+import { onMounted, ref } from "vue";
 
-export default {
-  data() {
-    return {
-      meals: [], // Holds the list of saved meals
-    };
-  },
-  async created() {
-    try {
-      const response = await api.get("/api/meals");
-      this.meals = response.data;
-    } catch (error) {
-      console.error("Error fetching meals:", error);
-    }
-  },
-  methods: {
-    async deleteMeal(id) {
-      try {
-        await api.delete(`/api/meals/${id}`);
-        this.meals = this.meals.filter((meal) => meal.id !== id);
-        alert("Meal deleted successfully!");
-      } catch (error) {
-        console.error("Error deleting meal:", error);
-        alert("Failed to delete meal.");
-      }
-    },
-  },
-};
+// Define the structure of a saved meal
+interface Meal {
+  id: string;
+  name: string;
+  ingredients: string;
+  instructions: string;
+  thumbnail: string;
+}
+
+const meals = ref<Meal[]>([]);
+
+// Fetch saved meals on component mount
+async function fetchMeals() {
+  try {
+    const response = await api.get("/api/meals");
+    meals.value = response.data;
+  } catch (error) {
+    console.error("Error fetching meals:", error);
+  }
+}
+
+async function deleteMeal(id: string) {
+  try {
+    await api.delete(`/api/meals/${id}`);
+    meals.value = meals.value.filter((meal) => meal.id !== id);
+    alert("Meal deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting meal:", error);
+    alert("Failed to delete meal.");
+  }
+}
+
+onMounted(fetchMeals);
 </script>
 
 <style scoped>
-/* Styling similar to RecipeSearch */
+/* Styling similar to Recipe Search */
 .saved-meals {
   max-width: 800px;
   margin: 0 auto;
@@ -63,7 +70,7 @@ h1 {
   color: #333;
 }
 
-ul {
+.meal-list {
   list-style: none;
   padding: 0;
 }
@@ -94,6 +101,7 @@ ul {
 .meal-info {
   padding: 15px;
   flex: 1;
+  text-align: left;
 }
 
 .meal-title {

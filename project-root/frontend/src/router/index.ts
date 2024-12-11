@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-import RecipeSearch from "../components/RecipeSearch.vue";
-import SavedMeals from "../components/SavedMeals.vue";
+import RecipeSearch from "../views/RecipeSearch.vue";
+import SavedMeals from "../views/SavedMeals.vue";
 
 const routes = [
   { path: "/", name: "RecipeSearch", component: RecipeSearch },

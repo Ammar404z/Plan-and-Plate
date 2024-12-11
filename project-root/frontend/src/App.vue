@@ -1,30 +1,27 @@
 <template>
-  <div id="app">
-    <nav>
-      <router-link to="/">Search Recipes</router-link>
-      <router-link to="/saved-meals"> Saved Meals</router-link>
-    </nav>
-    <router-view />
-  </div>
+  <img alt="Vue logo" src="./assets/logo.png">
+  <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
 </template>
 
-<script>
-export default {
-  name: "App",
-};
+<script lang="ts">
+import { defineComponent } from 'vue';
+import HelloWorld from './components/HelloWorld.vue';
+
+export default defineComponent({
+  name: 'App',
+  components: {
+    HelloWorld
+  }
+});
 </script>
 
 <style>
-nav {
-  background-color: #f8f9fa;
-  padding: 1em;
-}
-router-link {
-  margin-right: 1em;
-  text-decoration: none;
-  color: #42b983;
-}
-router-link:hover {
-  color: #66d9ef;
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
 }
 </style>
