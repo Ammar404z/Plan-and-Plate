@@ -19,4 +19,7 @@ public interface MealRepository extends CrudRepository<Meal, Long>  {
     List<Meal> findTop5ByOrderBySavedCountDesc(); 
 
     Meal findByName(String name);
+
+    @Query("SELECT SUM(m.savedCount) FROM Meal m")
+    long sumAllSavedCounts();
 }

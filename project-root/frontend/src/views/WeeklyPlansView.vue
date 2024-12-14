@@ -107,28 +107,107 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* General container styling for the view */
+.weekly-plans-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+
+/* Section title styling */
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2rem;
+  color: #007bff;
+}
+
+/* Styling for each weekly plan */
 .weekly-plan {
   margin-bottom: 20px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.create-button {
-  margin-bottom: 20px;
-  text-align: center;
+.weekly-plan h2 {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+  color: #0056b3;
 }
 
+/* Styling for meal list */
+.weekly-plan ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 15px;
+}
+
+.weekly-plan li {
+  font-size: 1rem;
+  padding: 5px 0;
+  color: #555;
+  border-bottom: 1px solid #eee;
+}
+
+.weekly-plan li:last-child {
+  border-bottom: none;
+}
+
+/* Button styling */
 button {
   background-color: #007bff;
   color: white;
   border: none;
   padding: 10px 15px;
+  font-size: 1rem;
   cursor: pointer;
   border-radius: 5px;
+  margin: 5px;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
   background-color: #0056b3;
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Create button container */
+.create-button {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.create-button button {
+  font-size: 1.2rem;
+  padding: 10px 20px;
+}
+
+/* Message for no plans available */
+p {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #777;
+  margin-top: 20px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .weekly-plan {
+    padding: 10px;
+  }
+
+  button {
+    font-size: 0.9rem;
+    padding: 8px 10px;
+  }
 }
 </style>

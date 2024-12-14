@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import api from "@/api"; // Import your Axios instance
+import api from "@/api";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
@@ -65,46 +65,82 @@ onMounted(async () => {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
+  background-color: #f9f9f9; /* Light background color */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
+/* Styling for the header */
 h1 {
   text-align: center;
   margin-bottom: 20px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
 }
 
+/* Styling for the scaling input section */
 .scaling-input {
   display: flex;
   justify-content: center;
-  margin-bottom: 15px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.scaling-input label {
+  font-size: 1rem;
+  margin-right: 10px;
+  color: #555;
 }
 
 .scaling-input input {
-  margin-left: 10px;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   width: 100px;
   text-align: center;
 }
 
+/* Styling for the list of ingredients */
 ul {
   list-style-type: none;
   padding: 0;
+  margin: 20px 0;
+  font-size: 1rem;
+  color: #555;
 }
 
 li {
-  margin: 5px 0;
+  margin: 8px 0;
+  padding: 8px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Light shadow for each list item */
 }
 
+/* Styling for the generate button */
 button {
   display: block;
-  margin: 0 auto 20px;
-  padding: 10px 20px;
+  margin: 20px auto;
+  padding: 12px 24px;
+  font-size: 1rem;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 button:hover {
   background-color: #0056b3;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add depth on hover */
+}
+
+button:active {
+  background-color: #004494;
+  box-shadow: none; /* Remove shadow on click */
 }
 </style>

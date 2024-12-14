@@ -102,30 +102,113 @@ async function saveWeeklyPlan(): Promise<void> {
 </script>
 <style scoped>
 .weekly-plan {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #f9f9f9; /* Light background for the plan container */
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
   text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.weekly-plan h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: bold;
 }
 
 .week-selector {
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.week-selector label {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-right: 10px;
+  color: #555;
+}
+
+.week-select {
+  font-size: 1rem;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  transition: border-color 0.3s ease;
+}
+
+.week-select:focus {
+  border-color: #007bff;
+  outline: none;
 }
 
 .days {
   display: flex;
   justify-content: space-between;
-  flex-wrap: nowrap; /* Horizontal layout */
-  gap: 10px; /* Add spacing between days */
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 .day {
-  flex: 1;
-  min-width: 100px;
+  flex: 1 1 calc(33.333% - 15px); /* Allows up to 3 items per row */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.day label {
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+  color: #555;
 }
 
 .meal-select {
-  margin-top: 5px;
   width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.meal-select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .day {
+    flex: 1 1 100%; /* Stack items on smaller screens */
+  }
+
+  .weekly-plan {
+    padding: 20px;
+  }
 }
 </style>
