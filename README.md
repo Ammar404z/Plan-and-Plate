@@ -1,93 +1,77 @@
 # Recipe Search App
 
-This project is a full-stack recipe search application that allows users to search for recipes by name. It consists of a **Spring Boot** backend and a **Vue.js** frontend, using **TheMealDB API** to fetch recipe data.
+http://193.196.52.222:8081/
 
-## Table of Contents
-- [Getting Started](#getting-started)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Running the Application](#running-the-application)
-- [Stopping the Application](#stopping-the-application)
-- [Accessing the Application](#acessing-the-application)
-- [Usage](#usage)
+This is a full-stack recipe search application that enables users to search for, save, and manage recipes, as well as generate weekly meal plans and shopping lists. It consists of a **Spring Boot** backend and a **Vue.js** frontend, using **TheMealDB API** to fetch recipe data.
 
-## Getting Started
+## Features
 
-Follow these instructions to set up and run the project on a VM.
+### Recipe Search and Save
 
-### Prerequisites
+- **Search for Recipes**:
 
-- **Java 17** or higher
-- **Maven** (for backend dependencies)
-- **Node.js and npm** (for frontend dependencies)
-- **Axios** (for HTTP requests in the frontend)
-- **Git** (optional, for cloning the project)
+  - Enter a recipe name in the search bar (e.g., "pizza" or "pasta").
+  - The application retrieves and displays matching recipes using **TheMealDB API**.
 
-(everything here is already installed on the vm, so you can skip the Installation steps)
+- **Save Recipes**:
+  - Users can save recipes to their personal list for later use.
 
-## Installation
+### Weekly Meal Plans
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.tik.uni-stuttgart.de/iste-sopra-2024-aeb/team-13.git
-   cd team-13
+- **Create a Weekly Meal Plan**:
 
-2. **Install Java 17 or higher**
+  - Use saved recipes to create and organize meal plans for the week.
+  - Plans can be customized to include different meals for each day.
 
-3. **Install Node.js and npm**
+- **View Weekly Plans**:
+  - Users can view all their created weekly plans and delete them if no longer needed.
 
-4. **Install Maven**
+### Shopping List Generation
 
-5. **Install Axios**
-   ```bash
-   cd frontend
-   npm install axios
+- **Generate Shopping Lists**:
+  - Automatically generate a shopping list based on a selected weekly meal plan.
+  - Duplicate ingredients are consolidated, and the list scales according to the selected number of servings.
 
-   
-   
-## Running the Application
+### Cooking Statistics
 
-A script has been provided to start both the frontend and backend servers in separate screen session:
+- **Most Saved Recipes**:
+  - View the top 5 recipes saved by users.
+- **Saved Recipes Counter**:
+  - Track the amount of times a user saved recipes.
 
-1. **Run the Start Script**:
-   ```bash
-   ./start.sh
-   ```
-   (this has already been done previously, no need to run the script again, do this only if the Application has not been started yet)
+---
 
-   this script will :
+## Accessing the Application
 
-   - Navigate to the frontend directory, install dependencies, and start the frontend server in a screen session named "frontend."
-   - Navigate to the backend directory, install dependencies, and start the Spring Boot application server in a screen session named "backend."
+### User Interface
 
-   *note that u have to be in the project-root directory to be able to run the script*
+- Navigate to the app through the provided URL.
+- The user interface includes the following key sections:
+  - **Search Recipes**: Enter a recipe name to search for meals.
+  - **Saved Meals**: View and manage your saved recipes.
+  - **Weekly Plans**: Create and view weekly meal plans.
+  - **Shopping List**: Generate and view shopping lists for your weekly plans.
+  - **Statistics**: Gain insights into saved and cooked recipes.
 
+### Navigation
 
- ## Stopping the Application
- 
- A stop script has also been provided to stop both the frontend and backend screen sessions.
+- The header contains links to all major features, making it easy to navigate between them.
 
- 1. **Run the Stop Script**:
-   ```bash
-   ./stop.sh
-   ```
+---
 
-   this script will :
+## Technology Stack
 
-   - Stop the frontend server in the "frontend" screen session.
-   - Stop the backend server in the "backend" screen session.
+- **Frontend**:
+  - **Vue.js**: Used for building the user interface.
+  - **Axios**: For making API calls to the backend.
+- **Backend**:
 
-   *note that you have to be in the project-root directory to be able to run the script*
- 
- ## Usage
- 
- 1. **Access The Application**:
- 
-    	•	Open a browser and go to http://[2001:7c0:2320:1:f816:3eff:fe09:d4aa]:8081/
-      •	The frontend sends a request to the backend, which fetches data from TheMealDB API and returns it to be displayed.
-      • the Project should already be running on the vm so you just have to paste the link above in your browser
-      
- 2.	**Search for Recipes**:
+  - **Spring Boot**: Provides REST APIs and handles business logic.
+  - **MariaDB**: Database for storing user data, recipes, and statistics.
 
-	•	Type a recipe name (e.g., “pizza” or “pasta”) in the search bar.
-	•	The frontend sends a request to the backend, which fetches data from TheMealDB API and returns it to be displayed.
+- **Third-Party API**:
+  - **TheMealDB API**: Used for fetching recipe data.
+
+---
+
+For further assistance contact: st188386@stud.uni-stuttgart.de.
