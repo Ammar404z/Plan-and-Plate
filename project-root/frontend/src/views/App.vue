@@ -3,6 +3,7 @@
     <nav>
       <router-link to="/">Search Recipes</router-link>
       <router-link to="/saved-meals"> Saved Meals</router-link>
+      <router-link to="/view-weekly-plans"> Weekly-plans </router-link>
     </nav>
     <router-view />
   </div>

@@ -1,4 +1,4 @@
-package com.AEB13.backend;
+package com.AEB13.backend.Meal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

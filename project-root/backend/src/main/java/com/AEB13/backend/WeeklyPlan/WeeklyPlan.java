@@ -17,10 +17,13 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "weekly_plans")
 public class WeeklyPlan {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true) // Enforces uniqueness in the database
+    private int week;
 
     @ElementCollection
     @CollectionTable(name = "weekly_plan_meals", joinColumns = @JoinColumn(name = "weekly_plan_id"))
@@ -36,6 +39,14 @@ public class WeeklyPlan {
         this.id = id;
     }
 
+    public int getWeek() {
+        return week;
+    }
+
+    public void setWeek(int week) {
+        this.week = week;
+    }
+
     public Map<String, Long> getMeals() {
         return meals;
     }
@@ -43,8 +54,4 @@ public class WeeklyPlan {
     public void setMeals(Map<String, Long> meals) {
         this.meals = meals;
     }
-
-
-
-
 }
