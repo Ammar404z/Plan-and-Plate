@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import CreateWeeklyPlans from "../views/CreateWeeklyPlans.vue";
 import RecipeSearch from "../views/RecipeSearch.vue";
 import SavedMeals from "../views/SavedMeals.vue";
+import ShoppingListView from "../views/ShoppingListView.vue";
 import WeeklyPlansView from "../views/WeeklyPlansView.vue";
 
 const routes = [
@@ -17,6 +18,7 @@ const routes = [
     name: "WeeklyPlans",
     component: WeeklyPlansView,
   },
+  { path: "/shopping-list", name: "ShoppingList", component: ShoppingListView },
 ];
 
 const router = createRouter({

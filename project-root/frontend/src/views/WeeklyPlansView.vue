@@ -17,6 +17,10 @@
         </ul>
         <!-- Delete Plan Button -->
         <button @click="deletePlan(plan.id)">Delete Plan</button>
+        <!-- Generate Shopping List Button -->
+        <button @click="navigateToShoppingList(plan.id)">
+          Generate Shopping List
+        </button>
       </div>
     </div>
     <p v-else>No weekly plans available.</p>
@@ -87,6 +91,11 @@ function createWeeklyPlan() {
   router.push("/create-weekly-plans");
 }
 
+// Function to navigate to the Shopping List View
+function navigateToShoppingList(planId: number) {
+  router.push({ path: "/shopping-list", query: { planId } });
+}
+
 // Fetch data on component mount
 onMounted(async () => {
   await fetchMeals();
@@ -118,5 +127,20 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.modal h2 {
+  margin-top: 0;
 }
 </style>
