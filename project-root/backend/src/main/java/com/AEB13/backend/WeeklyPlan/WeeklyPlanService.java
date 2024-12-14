@@ -21,49 +21,85 @@ public class WeeklyPlanService {
      @Autowired
     private MealRepository mealRepository;
 
+
     /**
-     * Generates a shopping list for a given weekly plan.
+     * Generates a shopping list for a given weekly plan, scaled for the specified number of people.
      * 
      * @param weeklyPlanId The ID of the weekly plan.
-     * @return A map with ingredients as keys and their total quantities as values.
+     * @param multiplier   The scaling factor (e.g., 2 for 2 people, 3 for 3 people).
+     * @return A map with ingredients as keys and their total scaled quantities as values.
      */
-    public Map<String, String> generateShoppingList(Long weeklyPlanId) {
+    public Map<String, String> generateShoppingList(Long weeklyPlanId, int multiplier) {
         WeeklyPlan weeklyPlan = weeklyPlanRepository.findById(weeklyPlanId)
                 .orElseThrow(() -> new IllegalArgumentException("Weekly Plan not found"));
 
-        Map<String, String> shoppingList = new HashMap<>();
+        Map<String, Double> consolidatedIngredients = new HashMap<>();
 
         for (String day : weeklyPlan.getMeals().keySet()) {
             Long mealId = weeklyPlan.getMeals().get(day);
             Meal meal = mealRepository.findById(mealId)
                     .orElseThrow(() -> new IllegalArgumentException("Meal not found"));
 
-            // Parse ingredients and aggregate quantities
-            parseAndAggregateIngredients(meal.getIngredients(), shoppingList);
+            // Parse and scale ingredients
+            parseAndAggregateIngredients(meal.getIngredients(), consolidatedIngredients, multiplier);
         }
 
-        return shoppingList;
+        // Format the shopping list for display
+        return formatShoppingList(consolidatedIngredients);
     }
 
     /**
-     * Parses the ingredients string and aggregates them into the shopping list.
+     * Parses the ingredients string, scales quantities, and aggregates them into the consolidated map.
      * 
-     * @param ingredients The ingredients string (e.g., "Tomato - 2 cups, Onion - 3").
-     * @param shoppingList The current shopping list map.
+     * @param ingredients            The ingredients string (e.g., "Tomato - 2 cups, Onion - 3").
+     * @param consolidatedIngredients The map to store consolidated and scaled ingredients.
+     * @param multiplier             The scaling factor for quantities.
      */
-    private void parseAndAggregateIngredients(String ingredients, Map<String, String> shoppingList) {
+    private void parseAndAggregateIngredients(String ingredients, Map<String, Double> consolidatedIngredients, int multiplier) {
         String[] items = ingredients.split(","); // Split by comma to get individual items
 
         for (String item : items) {
             String[] parts = item.split(" - "); // Split by " - " to separate ingredient name and quantity
             if (parts.length == 2) {
                 String ingredient = parts[0].trim(); // Ingredient name
-                String quantity = parts[1].trim(); // Quantity
+                String quantityString = parts[1].trim(); // Quantity (e.g., "2 cups")
 
-                // Aggregate quantities (simply concatenate for now; advanced logic can be added later)
-                shoppingList.merge(ingredient, quantity, (oldValue, newValue) -> oldValue + " + " + newValue);
+                try {
+                    // Handle numeric quantities with units
+                    String[] quantityParts = quantityString.split(" ", 2);
+
+                    double quantity = Double.parseDouble(quantityParts[0]) * multiplier; // Scale the quantity
+                    String unit = quantityParts.length > 1 ? quantityParts[1].trim() : ""; // Extract unit if present
+
+                    // Add to the consolidated map
+                    String key = ingredient + (unit.isEmpty() ? "" : " (" + unit + ")");
+                    consolidatedIngredients.merge(key, quantity, Double::sum);
+                } catch (NumberFormatException e) {
+                    // Handle non-numeric quantities (e.g., "As required")
+                    consolidatedIngredients.put(ingredient, -1.0); // Use -1.0 to indicate non-scalable
+                }
             }
         }
+    }
+
+    /**
+     * Formats the consolidated ingredients map into a user-friendly shopping list.
+     * 
+     * @param consolidatedIngredients The map with scaled ingredient quantities.
+     * @return A formatted map with ingredients as keys and their quantities as values.
+     */
+    private Map<String, String> formatShoppingList(Map<String, Double> consolidatedIngredients) {
+        Map<String, String> shoppingList = new HashMap<>();
+
+        for (Map.Entry<String, Double> entry : consolidatedIngredients.entrySet()) {
+            if (entry.getValue() == -1.0) {
+                shoppingList.put(entry.getKey(), "As required");
+            } else {
+                shoppingList.put(entry.getKey(), String.format("%.2f", entry.getValue()));
+            }
+        }
+
+        return shoppingList;
     }
 
 

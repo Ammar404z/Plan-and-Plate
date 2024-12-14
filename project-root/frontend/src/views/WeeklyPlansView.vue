@@ -17,6 +17,7 @@
         </ul>
         <!-- Delete Plan Button -->
         <button @click="deletePlan(plan.id)">Delete Plan</button>
+
         <!-- Generate Shopping List Button -->
         <button @click="navigateToShoppingList(plan.id)">
           Generate Shopping List
@@ -77,7 +78,6 @@ function getMealName(mealId: number): string {
 async function deletePlan(planId: number) {
   try {
     await api.delete(`/api/create-weekly-plans/${planId}`);
-    // Remove the deleted plan from the list
     weeklyPlans.value = weeklyPlans.value.filter((plan) => plan.id !== planId);
     alert("Plan deleted successfully!");
   } catch (error) {
@@ -93,7 +93,10 @@ function createWeeklyPlan() {
 
 // Function to navigate to the Shopping List View
 function navigateToShoppingList(planId: number) {
-  router.push({ path: "/shopping-list", query: { planId } });
+  router.push({
+    path: "/shopping-list",
+    query: { planId },
+  });
 }
 
 // Fetch data on component mount
@@ -127,20 +130,5 @@ button {
 
 button:hover {
   background-color: #0056b3;
-}
-
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  border: 1px solid #ccc;
-  padding: 20px;
-  z-index: 1000;
-}
-
-.modal h2 {
-  margin-top: 0;
 }
 </style>

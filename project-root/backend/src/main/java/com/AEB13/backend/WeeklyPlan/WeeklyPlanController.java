@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -23,21 +24,19 @@ public class WeeklyPlanController {
     private WeeklyPlanService weeklyPlanService;
 
 
-     /**
-     * Endpoint to generate a shopping list for a weekly plan.
-     * 
-     * @param weeklyPlanId The ID of the weekly plan.
-     * @return A consolidated shopping list.
-     */
-    @GetMapping("/shopping-list/{weeklyPlanId}")
-    public ResponseEntity<Map<String, String>> generateShoppingList(@PathVariable Long weeklyPlanId) {
-        try {
-            Map<String, String> shoppingList = weeklyPlanService.generateShoppingList(weeklyPlanId);
-            return ResponseEntity.ok(shoppingList);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
-        }
+@GetMapping("/shopping-list/{planId}")
+public ResponseEntity<Map<String, String>> generateShoppingList(
+    @PathVariable Long planId,
+    @RequestParam(defaultValue = "1") int multiplier
+) {
+    System.out.println("Received scale: " + multiplier +"for PlanId" + planId); //Debug log
+    try {
+        Map<String, String> shoppingList = weeklyPlanService.generateShoppingList(planId, multiplier);
+        return ResponseEntity.ok(shoppingList);
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
     }
+}
 
 
     @GetMapping("/create-weekly-plans/{id}")
