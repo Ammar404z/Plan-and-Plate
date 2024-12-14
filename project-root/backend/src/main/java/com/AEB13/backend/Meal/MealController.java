@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class MealController {
+
+    @Autowired
+    private MealRepository mealRepository ;
     
     @Autowired
     private MealService mealService;
@@ -42,5 +45,12 @@ public class MealController {
     public ResponseEntity<Void> deleteMeal(@PathVariable Long id) {
         mealService.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/api/statistics/top-saved-recipes")
+    public List<Meal> getTopSavedMeals() {
+        List<Meal> meals = mealRepository.findTop5ByOrderBySavedCountDesc();
+        System.out.println("Top saved meals: " + meals); // Debug log
+        return meals;
     }
 }

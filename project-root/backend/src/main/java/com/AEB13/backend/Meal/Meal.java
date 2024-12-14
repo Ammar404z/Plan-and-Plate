@@ -25,8 +25,40 @@ public class Meal {
     private String instructions;
 
     private String thumbnail;
+    
+    @Column
+    private int savedCount = 0;
 
+    @Column
+    private int cookedCount = 0;
+
+    private boolean deleted = false; // default
+    
     // Getters and setters
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public int getCookedCount() {
+        return cookedCount;
+    }
+
+    public void setCookedCount(int cookedCount) {
+        this.cookedCount = cookedCount;
+    }
+
+    public int getSavedCount() {
+        return savedCount;
+    }
+
+    public void setSavedCount(int savedCount) {
+        this.savedCount = savedCount;
+    }
 
     public String getThumbnail() {
         return thumbnail;

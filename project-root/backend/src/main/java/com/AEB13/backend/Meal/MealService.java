@@ -24,8 +24,15 @@ public class MealService {
         return restTemplate.getForObject(url, Map.class);
     }
 
-    public Meal addMeal(Meal meal){
-        return mealRepository.save(meal);
+    public Meal addMeal(Meal meal) {
+        Meal existingMeal = mealRepository.findByName(meal.getName());
+        if (existingMeal != null) {
+            existingMeal.setSavedCount(existingMeal.getSavedCount() + 1);
+            return mealRepository.save(existingMeal);
+        } else {
+            meal.setSavedCount(1); // Initialize the count for a new meal
+            return mealRepository.save(meal);
+        }
     }
 
     public List<Meal> getAllMeals(){
@@ -33,7 +40,9 @@ public class MealService {
     }
 
     public void deleteById(Long id) {
-        mealRepository.deleteById(id);
-     }
-    
+        Meal meal = mealRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Meal not found"));
+meal.setDeleted(true);
+mealRepository.save(meal); // Save the updated meal with deleted = true     }
     }
+}
