@@ -1,4 +1,4 @@
-package com.AEB13.backend;
+package com.AEB13.backend.Meal;
 
 import java.util.List;
 
