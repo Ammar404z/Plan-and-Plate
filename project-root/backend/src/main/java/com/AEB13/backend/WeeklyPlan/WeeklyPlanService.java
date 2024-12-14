@@ -45,60 +45,82 @@ public class WeeklyPlanService {
         }
 
         // Format the shopping list for display
-        return formatShoppingList(consolidatedIngredients);
+        return formatShoppingList(consolidatedIngredients, multiplier);
     }
 
-    /**
-     * Parses the ingredients string, scales quantities, and aggregates them into the consolidated map.
-     * 
-     * @param ingredients            The ingredients string (e.g., "Tomato - 2 cups, Onion - 3").
-     * @param consolidatedIngredients The map to store consolidated and scaled ingredients.
-     * @param multiplier             The scaling factor for quantities.
-     */
     private void parseAndAggregateIngredients(String ingredients, Map<String, Double> consolidatedIngredients, int multiplier) {
         String[] items = ingredients.split(","); // Split by comma to get individual items
-
+    
         for (String item : items) {
             String[] parts = item.split(" - "); // Split by " - " to separate ingredient name and quantity
             if (parts.length == 2) {
                 String ingredient = parts[0].trim(); // Ingredient name
-                String quantityString = parts[1].trim(); // Quantity (e.g., "2 cups")
-
+                String quantityString = parts[1].trim(); // Quantity (e.g., "2 cups" or "pinch")
+    
                 try {
                     // Handle numeric quantities with units
                     String[] quantityParts = quantityString.split(" ", 2);
-
-                    double quantity = Double.parseDouble(quantityParts[0]) * multiplier; // Scale the quantity
+    
+                    double quantity = parseFraction(quantityParts[0]) * multiplier; // Handle fractions like "1/2"
                     String unit = quantityParts.length > 1 ? quantityParts[1].trim() : ""; // Extract unit if present
-
+    
                     // Add to the consolidated map
                     String key = ingredient + (unit.isEmpty() ? "" : " (" + unit + ")");
-                    consolidatedIngredients.merge(key, quantity, Double::sum);
+                    consolidatedIngredients.merge(key, quantity, (oldVal, newVal) -> Math.max(0, oldVal + newVal));
+    
                 } catch (NumberFormatException e) {
-                    // Handle non-numeric quantities (e.g., "As required")
-                    consolidatedIngredients.put(ingredient, -1.0); // Use -1.0 to indicate non-scalable
+                    // Handle non-numeric quantities (e.g., "pinch", "splash")
+                    String key = ingredient + " (" + quantityString + ")";
+                    consolidatedIngredients.putIfAbsent(key, -1.0); // Ensure non-scalable keys are added only once
                 }
             }
         }
+    }
+    
+    /**
+     * Parses a fraction or a numeric value and converts it to a double.
+     * 
+     * @param input The input string (e.g., "1/2", "0.5").
+     * @return The parsed numeric value.
+     * @throws NumberFormatException if the input is not a valid number or fraction.
+     */
+    private double parseFraction(String input) throws NumberFormatException {
+        if (input.contains("/")) {
+            String[] fractionParts = input.split("/");
+            if (fractionParts.length == 2) {
+                double numerator = Double.parseDouble(fractionParts[0].trim());
+                double denominator = Double.parseDouble(fractionParts[1].trim());
+                return numerator / denominator;
+            } else {
+                throw new NumberFormatException("Invalid fraction format");
+            }
+        }
+        return Double.parseDouble(input); // For standard numeric values
     }
 
     /**
      * Formats the consolidated ingredients map into a user-friendly shopping list.
      * 
      * @param consolidatedIngredients The map with scaled ingredient quantities.
+     * @param multilplier the number of portions/people
      * @return A formatted map with ingredients as keys and their quantities as values.
      */
-    private Map<String, String> formatShoppingList(Map<String, Double> consolidatedIngredients) {
+    private Map<String, String> formatShoppingList(Map<String, Double> consolidatedIngredients, int multiplier) {
         Map<String, String> shoppingList = new HashMap<>();
-
+    
         for (Map.Entry<String, Double> entry : consolidatedIngredients.entrySet()) {
-            if (entry.getValue() == -1.0) {
-                shoppingList.put(entry.getKey(), "As required");
+            String ingredient = entry.getKey();
+            Double quantity = entry.getValue();
+    
+            if (quantity == -1.0) {
+                // For non-numerical ingredients, retain the original measurement
+                shoppingList.put(ingredient,  multiplier+"x original measurement" );
             } else {
-                shoppingList.put(entry.getKey(), String.format("%.2f", entry.getValue()));
+                // For numerical ingredients, format as usual
+                shoppingList.put(ingredient, String.format("%.2f", quantity));
             }
         }
-
+    
         return shoppingList;
     }
 
