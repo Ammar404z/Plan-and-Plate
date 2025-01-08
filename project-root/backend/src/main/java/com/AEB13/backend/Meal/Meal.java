@@ -5,7 +5,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 @Entity
@@ -20,7 +19,6 @@ public class Meal {
     private String name;
 
     @Column(columnDefinition = "TEXT") // Ensure it can store large text
-    @Lob
     private String ingredients;
 
     @Column(columnDefinition = "LONGTEXT") // Ensure it can store long instructions

@@ -36,7 +36,10 @@ public class MealService {
         }
     }
 
-    // TODO: handle the statistcs implementation like above
+    /*
+     * TODO:
+     * - handle the statistcs implementation like above
+     */
     public Meal addCustomMeal(Meal meal) {
         // Check if a meal with the same name already exists
         Meal existingMeal = mealRepository.findByName(meal.getName());
