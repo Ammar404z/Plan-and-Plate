@@ -4,8 +4,8 @@ import { createRouter, createWebHistory } from "vue-router";
 import CreateWeeklyPlans from "../views/CreateWeeklyPlans.vue";
 import RecipeSearch from "../views/RecipeSearch.vue";
 import SavedMeals from "../views/SavedMeals.vue";
-import ShoppingListView from "../views/ShoppingListView.vue";
-import WeeklyPlansView from "../views/WeeklyPlansView.vue";
+import ShoppingListView from "../views/WeeklyPlans/ShoppingListView.vue";
+import WeeklyPlansView from "../views/WeeklyPlans/WeeklyPlansView.vue";
 
 const routes = [
   { path: "/", name: "RecipeSearch", component: RecipeSearch },
