@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 @Entity
@@ -19,13 +20,14 @@ public class Meal {
     private String name;
 
     @Column(columnDefinition = "TEXT") // Ensure it can store large text
+    @Lob
     private String ingredients;
 
     @Column(columnDefinition = "LONGTEXT") // Ensure it can store long instructions
     private String instructions;
 
     private String thumbnail;
-    
+
     @Column
     private int savedCount = 0;
 
@@ -33,7 +35,7 @@ public class Meal {
     private int cookedCount = 0;
 
     private boolean deleted = false; // default
-    
+
     // Getters and setters
 
     public boolean isDeleted() {
@@ -76,30 +78,28 @@ public class Meal {
         this.id = id;
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
 
-    public void setName(String name){
+    public void setName(String name) {
         this.name = name;
     }
-     
-    public String getIngredients()
-    {
+
+    public String getIngredients() {
         return ingredients;
     }
 
-    public void setIngredients(String ingredients){
+    public void setIngredients(String ingredients) {
         this.ingredients = ingredients;
     }
 
-    public String getInstructions(){
+    public String getInstructions() {
         return instructions;
     }
 
-    public void setInstructions(String instructions){
+    public void setInstructions(String instructions) {
         this.instructions = instructions;
     }
-    
-    
+
 }

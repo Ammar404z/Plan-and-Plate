@@ -1,6 +1,9 @@
 <template>
   <div class="saved-meals">
     <h1>Your Saved Meals</h1>
+    <button @click="navigateToAddMeal" class="add-meal-btn">
+      Add Custom Meal
+    </button>
     <ul v-if="meals.length > 0" class="meal-list">
       <li v-for="meal in meals" :key="meal.id" class="meal-card">
         <img :src="meal.thumbnail" alt="Meal Thumbnail" class="meal-image" />
@@ -19,6 +22,7 @@
 <script setup lang="ts">
 import api from "@/api";
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router"; // Import the router to navigate
 
 // Define the structure of a saved meal
 interface Meal {
@@ -30,6 +34,11 @@ interface Meal {
 }
 
 const meals = ref<Meal[]>([]);
+const router = useRouter();
+
+function navigateToAddMeal() {
+  router.push("/add-meal");
+}
 
 // Fetch saved meals on component mount
 async function fetchMeals() {
@@ -57,6 +66,21 @@ onMounted(fetchMeals);
 
 <style scoped>
 /* Styling similar to Recipe Search */
+
+.add-meal-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  transition: background-color 0.3s;
+}
+
+.add-meal-btn:hover {
+  background-color: #0056b3;
+}
 .saved-meals {
   max-width: 800px;
   margin: 0 auto;

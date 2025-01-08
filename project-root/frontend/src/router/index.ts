@@ -1,3 +1,4 @@
+import AddMeal from "@/views/AddMeal.vue";
 import StatisticsView from "@/views/StatisticsView.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import CreateWeeklyPlans from "../views/CreateWeeklyPlans.vue";
@@ -21,6 +22,7 @@ const routes = [
   },
   { path: "/shopping-list", name: "ShoppingList", component: ShoppingListView },
   { path: "/statistics", name: "Statisticsview", component: StatisticsView },
+  { path: "/add-meal", name: "AddMeal", component: AddMeal },
 ];
 
 const router = createRouter({

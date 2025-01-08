@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class MealController {
 
     @Autowired
-    private MealRepository mealRepository ;
-    
+    private MealRepository mealRepository;
+
     @Autowired
     private MealService mealService;
 
@@ -27,12 +27,18 @@ public class MealController {
         return mealService.searchMealByName(name);
     }
 
-    
     @PostMapping("/api/meals/add")
     public ResponseEntity<Meal> addMeal(@RequestBody Meal meal) {
         System.out.println("Received Meal: " + meal.getName()); // Debug log
         Meal savedMeal = mealService.addMeal(meal);
         System.out.println("Saved Meal: " + savedMeal.getName()); // Debug log
+        return ResponseEntity.ok(savedMeal);
+    }
+
+    @PostMapping("/api/meals/add-custom") // add custom meal endpoint here. This endpoint should accept a custom meal
+                                          // object and save it to the database.
+    public ResponseEntity<Meal> addCustomMeal(@RequestBody Meal meal) {
+        Meal savedMeal = mealService.addCustomMeal(meal);
         return ResponseEntity.ok(savedMeal);
     }
 
