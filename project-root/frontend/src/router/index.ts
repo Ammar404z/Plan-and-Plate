@@ -1,9 +1,9 @@
-import AddMeal from "@/views/AddMeal.vue";
-import StatisticsView from "@/views/StatisticsView.vue";
+import AddMeal from "@/views/SavedMeals/AddMeal.vue";
+import StatisticsView from "@/views/Statistics/StatisticsView.vue";
 import { createRouter, createWebHistory } from "vue-router";
-import CreateWeeklyPlans from "../views/CreateWeeklyPlans.vue";
-import RecipeSearch from "../views/RecipeSearch.vue";
-import SavedMeals from "../views/SavedMeals.vue";
+import SavedMeals from "../views/SavedMeals/SavedMeals.vue";
+import RecipeSearch from "../views/SearchMeals/RecipeSearch.vue";
+import CreateWeeklyPlans from "../views/WeeklyPlans/CreateWeeklyPlans.vue";
 import ShoppingListView from "../views/WeeklyPlans/ShoppingListView.vue";
 import WeeklyPlansView from "../views/WeeklyPlans/WeeklyPlansView.vue";
 

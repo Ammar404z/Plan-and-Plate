@@ -34,29 +34,7 @@ public class Meal {
 
     private boolean deleted = false; // default
 
-    @Column
-    private String category;
-
-    @Column
-    private String area;
-
     // Getters and setters
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getArea() {
-        return area;
-    }
-
-    public void setArea(String area) {
-        this.area = area;
-    }
 
     public boolean isDeleted() {
         return deleted;
