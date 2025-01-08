@@ -34,6 +34,12 @@ public class Meal {
 
     private boolean deleted = false; // default
 
+    @Column
+    private String category;
+
+    @Column
+    private String area;
+
     // Getters and setters
 
     public boolean isDeleted() {
