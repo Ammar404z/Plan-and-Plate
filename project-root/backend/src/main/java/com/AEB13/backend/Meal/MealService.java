@@ -63,7 +63,7 @@ public class MealService {
     public void deleteById(Long id) {
         Meal meal = mealRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meal not found"));
-        meal.setDeleted(true);
-        mealRepository.save(meal); // Save the updated meal with deleted = true }
+
+        mealRepository.delete(meal);
     }
 }

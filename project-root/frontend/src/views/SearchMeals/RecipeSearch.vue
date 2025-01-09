@@ -10,13 +10,11 @@
 
     <!-- Wrapper element with v-if applied -->
     <div v-if="meals.length > 0" class="results">
-      <div class="meal-card" v-for="meal in meals" :key="meal.idMeal">
-        <img :src="meal.strMealThumb" alt="Meal Image" class="meal-image" />
+      <div class="meal-card" v-for="meal in meals" :key="meal.idl">
+        <img :src="meal.thumbnail" alt="Meal Image" class="meal-image" />
         <div class="meal-info">
-          <h3 class="meal-title">{{ meal.strMeal }}</h3>
-          <p class="meal-instructions">
-            {{ meal.strInstructions.substring(0, 100) }}...
-          </p>
+          <h3 class="meal-title">{{ meal.name }}</h3>
+
           <!-- Save Recipe Button -->
           <button @click="saveRecipe(meal)">Save Recipe</button>
         </div>
@@ -36,10 +34,11 @@ import { ref } from "vue";
 
 //Define the structure of a Meal from TheMealDB API
 interface Meal {
-  idMeal: string;
-  strMeal: string;
-  strMealThumb: string;
-  strInstructions: string;
+  id: string;
+  name: string;
+  ingredients: string;
+  instructions: string;
+  thumbnail: string;
   [key: string]: any; // we do this to allow dynamic ingredient keys like strIngredient1, strMeasure1, etc...
 }
 
@@ -52,7 +51,15 @@ async function searchMeals() {
       const response = await api.get("/api/meals/search", {
         params: { name: query.value },
       });
-      meals.value = response.data.meals || [];
+
+      // Map API response to your custom field names
+      meals.value = (response.data.meals || []).map((meal: any) => ({
+        id: meal.idMeal, // Map idMeal to id
+        name: meal.strMeal, // Map strMeal to name
+        thumbnail: meal.strMealThumb, // Map strMealThumb to thumbnail
+        instructions: meal.strInstructions || "No instructions available.", // Map strInstructions to instructions
+        ingredients: extractIngredients(meal), // Dynamically extract ingredients
+      }));
     } catch (error) {
       console.error("Error fetching meals:", error);
     }
@@ -61,24 +68,33 @@ async function searchMeals() {
   }
 }
 
-function extractIngredients(meal: Meal): string {
+function extractIngredients(meal: any): string {
   const ingredients: string[] = [];
   for (let i = 1; i <= 20; i++) {
     const ingredient = meal[`strIngredient${i}`];
     const measure = meal[`strMeasure${i}`];
+
+    console.log(`Ingredient ${i}:`, ingredient);
+    console.log(`Measure ${i}:`, measure);
+
     if (ingredient && ingredient.trim() !== "") {
-      ingredients.push(`${ingredient} - ${measure || "as needed"}`);
+      ingredients.push(
+        `${ingredient.trim()} - ${measure?.trim() || "as needed"}`
+      );
     }
   }
-  return ingredients.join(", ");
+
+  return ingredients.length > 0
+    ? ingredients.join(", ")
+    : "No ingredients available.";
 }
 
 async function saveRecipe(meal: Meal) {
   const recipe = {
-    name: meal.strMeal || "Unnamed Recipe",
-    ingredients: extractIngredients(meal),
-    instructions: meal.strInstructions,
-    thumbnail: meal.strMealThumb,
+    name: meal.name || "Unnamed Recipe",
+    ingredients: meal.ingredients,
+    instructions: meal.instructions,
+    thumbnail: meal.thumbnail,
   };
 
   console.log("Payload being sent:", recipe); // Debug log

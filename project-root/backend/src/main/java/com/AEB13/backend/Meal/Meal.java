@@ -32,17 +32,7 @@ public class Meal {
     @Column
     private int cookedCount = 0;
 
-    private boolean deleted = false; // default
-
     // Getters and setters
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
-    }
 
     public int getCookedCount() {
         return cookedCount;
