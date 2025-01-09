@@ -1,6 +1,29 @@
 <template>
   <div class="search-container">
     <h1>Recipe Search</h1>
+    <!-- Dropdown for categories -->
+    <div class="filters">
+      <select v-model="selectedCategory" @change="applyFilters">
+        <option value="">All Categories</option>
+        <option
+          v-for="category in categories"
+          :key="category"
+          :value="category"
+        >
+          {{ category }}
+        </option>
+      </select>
+
+      <!-- Dropdown for areas -->
+      <select v-model="selectedArea" @change="applyFilters">
+        <option value="">All Areas</option>
+        <option v-for="area in areas" :key="area" :value="area">
+          {{ area }}
+        </option>
+      </select>
+    </div>
+
+    <!--search bar-->
     <input
       v-model="query"
       placeholder="Search for a recipe"
@@ -30,7 +53,7 @@
 
 <script setup lang="ts">
 import api from "@/api";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 //Define the structure of a Meal from TheMealDB API
 interface Meal {
@@ -44,6 +67,65 @@ interface Meal {
 
 const query = ref("");
 const meals = ref<Meal[]>([]);
+
+//for filtering purposes
+const categories = ref<string[]>([]);
+const areas = ref<string[]>([]);
+const selectedCategory = ref<string>("");
+const selectedArea = ref<string>("");
+
+// fetch the filters to be displayed in the dropdown menu
+async function fetchFilters() {
+  try {
+    // Fetch categories from backend
+    const categoryResponse = await api.get("/api/meals/categories");
+    console.log("Category Response:", categoryResponse.data);
+    categories.value = categoryResponse.data.meals.map(
+      (category: any) => category.strCategory
+    );
+
+    // Fetch areas from backend
+    const areaResponse = await api.get("/api/meals/areas");
+    console.log("Area Response:", areaResponse.data);
+    areas.value = areaResponse.data.meals.map((area: any) => area.strArea);
+
+    console.log("Categories:", categories.value);
+    console.log("Areas:", areas.value);
+  } catch (error) {
+    console.error("Error fetching filters:", error);
+  }
+}
+
+async function applyFilters() {
+  try {
+    // Ensure at least one filter is selected
+    if (!selectedCategory.value && !selectedArea.value) {
+      console.error("No filters selected. Skipping API call.");
+      return;
+    }
+
+    let url = "/api/meals/filter";
+
+    // Add query parameters based on filters
+    if (selectedCategory.value) {
+      url += `?category=${encodeURIComponent(selectedCategory.value)}`;
+    } else if (selectedArea.value) {
+      url += `?area=${encodeURIComponent(selectedArea.value)}`;
+    }
+
+    // Fetch filtered meals
+    const response = await api.get(url);
+    meals.value = (response.data.meals || []).map((meal: any) => ({
+      id: meal.idMeal,
+      name: meal.strMeal,
+      thumbnail: meal.strMealThumb,
+    }));
+
+    console.log("Filtered meals:", meals.value);
+  } catch (error) {
+    console.error("Error applying filters:", error);
+  }
+}
 
 async function searchMeals() {
   if (query.value) {
@@ -74,9 +156,6 @@ function extractIngredients(meal: any): string {
     const ingredient = meal[`strIngredient${i}`]; //
     const measure = meal[`strMeasure${i}`]; // we have to use strMeasure here since its what we are getting back from the api, same goes for strIngrediet
 
-    console.log(`Ingredient ${i}:`, ingredient);
-    console.log(`Measure ${i}:`, measure);
-
     if (ingredient && ingredient.trim() !== "") {
       ingredients.push(
         `${ingredient.trim()} - ${measure?.trim() || "as needed"}`
@@ -90,22 +169,35 @@ function extractIngredients(meal: any): string {
 }
 
 async function saveRecipe(meal: Meal) {
-  const recipe = {
-    name: meal.name || "Unnamed Recipe",
-    ingredients: meal.ingredients,
-    instructions: meal.instructions,
-    thumbnail: meal.thumbnail,
-  };
-
-  console.log("Payload being sent:", recipe); // Debug log
-
   try {
-    const response = await api.post("/api/meals/add", recipe);
-    alert(`Recipe "${response.data.name}" saved successfully.`);
+    // Fetch full meal details by id from the backend or API
+    const response = await api.get(
+      `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.id}`
+    );
+    const fullMeal = response.data.meals[0]; // Assuming the API returns an array with one meal object
+
+    // Map the full meal details to the recipe payload
+    const recipe = {
+      name: fullMeal.strMeal || "Unnamed Recipe",
+      ingredients: extractIngredients(fullMeal), // Extract ingredients dynamically
+      instructions: fullMeal.strInstructions || "No instructions available.",
+      thumbnail: fullMeal.strMealThumb,
+    };
+
+    console.log("Payload being sent:", recipe); // Debug log
+
+    // Send the full meal details to the backend
+    const saveResponse = await api.post("/api/meals/add", recipe);
+    alert(`Recipe "${saveResponse.data.name}" saved successfully.`);
   } catch (error) {
     console.error("Error saving recipe:", error);
+    alert("Failed to save recipe. Please try again.");
   }
 }
+
+onMounted(() => {
+  fetchFilters();
+});
 </script>
 
 <style scoped>

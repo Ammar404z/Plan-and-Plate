@@ -17,6 +17,9 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class MealController {
+    @Value("${themealdb.api.url}")
+    private String themealdbApiUrl;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
     private MealRepository mealRepository;
@@ -44,9 +47,9 @@ public class MealController {
         return ResponseEntity.ok(savedMeal);
     }
 
-    @Value("${themealdb.api.url}")
-    private String themealdbApiUrl;
-
+    /*
+     * TODO: add the logic in the service layer
+     */
     @GetMapping("api/meals/filter")
     public ResponseEntity<?> filterMeals(
             @RequestParam(required = false) String category,
@@ -72,6 +75,35 @@ public class MealController {
             return ResponseEntity.ok(response.getBody());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error fetching filtered meals: " + e.getMessage());
+        }
+    }
+
+    /*
+     * TODO: add the logic in the service layer
+     */
+    @GetMapping("/api/meals/categories")
+    public ResponseEntity<?> getCategories() {
+        String url = themealdbApiUrl + "/list.php?c=list";
+        try {
+            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+            return ResponseEntity.ok(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error fetching categories: " + e.getMessage());
+        }
+    }
+
+    /*
+     * TODO: add the logic in the service layer
+     */
+    // Endpoint to fetch meal areas
+    @GetMapping("/api/meals/areas")
+    public ResponseEntity<?> getAreas() {
+        String url = themealdbApiUrl + "/list.php?a=list";
+        try {
+            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+            return ResponseEntity.ok(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error fetching areas: " + e.getMessage());
         }
     }
 
