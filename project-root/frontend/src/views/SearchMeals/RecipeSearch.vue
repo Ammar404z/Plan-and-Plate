@@ -1,24 +1,17 @@
 <template>
   <div class="search-container">
     <h1>Recipe Search</h1>
-    <!-- Dropdown for categories -->
+    <!-- Dropdown for filters -->
     <div class="filters">
-      <select v-model="selectedCategory" @change="applyFilters">
-        <option value="">All Categories</option>
+      <!-- Single Dropdown for Combined Filters -->
+      <select v-model="selectedFilter" @change="applyFilters">
+        <option value="">All Filters</option>
         <option
-          v-for="category in categories"
-          :key="category"
-          :value="category"
+          v-for="filter in combinedFilters"
+          :key="filter.type + filter.value"
+          :value="filter.value"
         >
-          {{ category }}
-        </option>
-      </select>
-
-      <!-- Dropdown for areas -->
-      <select v-model="selectedArea" @change="applyFilters">
-        <option value="">All Areas</option>
-        <option v-for="area in areas" :key="area" :value="area">
-          {{ area }}
+          {{ filter.type }}: {{ filter.value }}
         </option>
       </select>
     </div>
@@ -69,49 +62,46 @@ const query = ref("");
 const meals = ref<Meal[]>([]);
 
 //for filtering purposes
-const categories = ref<string[]>([]);
-const areas = ref<string[]>([]);
-const selectedCategory = ref<string>("");
-const selectedArea = ref<string>("");
+const combinedFilters = ref<{ type: string; value: string }[]>([]); // Combined filters array
+const selectedFilter = ref<string>(""); // selected filter value
 
 // fetch the filters to be displayed in the dropdown menu
 async function fetchFilters() {
   try {
-    // Fetch categories from backend
-    const categoryResponse = await api.get("/api/meals/categories");
-    console.log("Category Response:", categoryResponse.data);
-    categories.value = categoryResponse.data.meals.map(
-      (category: any) => category.strCategory
-    );
+    // Fetch combined categories and areas from the backend
+    const response = await api.get("/api/meals/categoriesAndAreas");
 
-    // Fetch areas from backend
-    const areaResponse = await api.get("/api/meals/areas");
-    console.log("Area Response:", areaResponse.data);
-    areas.value = areaResponse.data.meals.map((area: any) => area.strArea);
+    // Populate the combinedFilters array
+    combinedFilters.value = response.data.filters.map((filter: any) => ({
+      type: filter.type, // e.g., "Category" or "Area"
+      value: filter.value, // e.g., "Seafood" or "Canadian"
+    }));
 
-    console.log("Categories:", categories.value);
-    console.log("Areas:", areas.value);
+    console.log("Fetched combined filters:", combinedFilters.value);
   } catch (error) {
-    console.error("Error fetching filters:", error);
+    console.error("Error fetching combined filters:", error);
   }
 }
 
 async function applyFilters() {
   try {
-    // Ensure at least one filter is selected
-    if (!selectedCategory.value && !selectedArea.value) {
-      console.error("No filters selected. Skipping API call.");
-      return;
-    }
-
     let url = "/api/meals/filter";
+    const params = new URLSearchParams();
 
-    // Add query parameters based on filters
-    if (selectedCategory.value) {
-      url += `?category=${encodeURIComponent(selectedCategory.value)}`;
-    } else if (selectedArea.value) {
-      url += `?area=${encodeURIComponent(selectedArea.value)}`;
+    // Determine if the selected filter is a category or area
+    const selected = combinedFilters.value.find(
+      (filter) => filter.value === selectedFilter.value
+    );
+
+    if (selected) {
+      if (selected.type === "Category") {
+        params.append("category", selected.value);
+      } else if (selected.type === "Area") {
+        params.append("area", selected.value);
+      }
     }
+
+    url += `?${params.toString()}`;
 
     // Fetch filtered meals
     const response = await api.get(url);

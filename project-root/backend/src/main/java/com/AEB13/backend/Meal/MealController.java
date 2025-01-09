@@ -1,5 +1,6 @@
 package com.AEB13.backend.Meal;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 public class MealController {
@@ -81,29 +84,38 @@ public class MealController {
     /*
      * TODO: add the logic in the service layer
      */
-    @GetMapping("/api/meals/categories")
-    public ResponseEntity<?> getCategories() {
-        String url = themealdbApiUrl + "/list.php?c=list";
-        try {
-            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-            return ResponseEntity.ok(response.getBody());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error fetching categories: " + e.getMessage());
-        }
-    }
+    @GetMapping("/api/meals/categoriesAndAreas")
+    public ResponseEntity<?> getCategoriesAndAreas() {
+        String categoriesUrl = themealdbApiUrl + "/list.php?c=list"; // Categories endpoint
+        String areasUrl = themealdbApiUrl + "/list.php?a=list"; // Areas endpoint
 
-    /*
-     * TODO: add the logic in the service layer
-     */
-    // Endpoint to fetch meal areas
-    @GetMapping("/api/meals/areas")
-    public ResponseEntity<?> getAreas() {
-        String url = themealdbApiUrl + "/list.php?a=list";
         try {
-            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-            return ResponseEntity.ok(response.getBody());
+            // Fetch categories and areas from TheMealDB API
+            ResponseEntity<String> categoriesResponse = restTemplate.getForEntity(categoriesUrl, String.class);
+            ResponseEntity<String> areasResponse = restTemplate.getForEntity(areasUrl, String.class);
+
+            // Parse responses into JSON format
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<Map<String, String>> categories = (List<Map<String, String>>) objectMapper
+                    .readValue(categoriesResponse.getBody(), Map.class).get("meals");
+            List<Map<String, String>> areas = (List<Map<String, String>>) objectMapper
+                    .readValue(areasResponse.getBody(), Map.class).get("meals");
+
+            // Combine categories and areas into a single list with type and value
+            List<Map<String, String>> combinedFilters = new ArrayList<>();
+            for (Map<String, String> category : categories) {
+                combinedFilters.add(Map.of("type", "Category", "value", category.get("strCategory")));
+            }
+            for (Map<String, String> area : areas) {
+                combinedFilters.add(Map.of("type", "Area", "value", area.get("strArea")));
+            }
+
+            // Return the combined list as a single key "filters"
+            Map<String, Object> response = Map.of("filters", combinedFilters);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error fetching areas: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error fetching categories and areas: " + e.getMessage());
         }
     }
 
