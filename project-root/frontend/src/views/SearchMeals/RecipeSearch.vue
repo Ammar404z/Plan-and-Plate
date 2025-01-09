@@ -10,7 +10,7 @@
 
     <!-- Wrapper element with v-if applied -->
     <div v-if="meals.length > 0" class="results">
-      <div class="meal-card" v-for="meal in meals" :key="meal.idl">
+      <div class="meal-card" v-for="meal in meals" :key="meal.id">
         <img :src="meal.thumbnail" alt="Meal Image" class="meal-image" />
         <div class="meal-info">
           <h3 class="meal-title">{{ meal.name }}</h3>
@@ -52,7 +52,7 @@ async function searchMeals() {
         params: { name: query.value },
       });
 
-      // Map API response to your custom field names
+      // Map API response to your custom field names (Issue #3)
       meals.value = (response.data.meals || []).map((meal: any) => ({
         id: meal.idMeal, // Map idMeal to id
         name: meal.strMeal, // Map strMeal to name
@@ -71,8 +71,8 @@ async function searchMeals() {
 function extractIngredients(meal: any): string {
   const ingredients: string[] = [];
   for (let i = 1; i <= 20; i++) {
-    const ingredient = meal[`strIngredient${i}`];
-    const measure = meal[`strMeasure${i}`];
+    const ingredient = meal[`strIngredient${i}`]; //
+    const measure = meal[`strMeasure${i}`]; // we have to use strMeasure here since its what we are getting back from the api, same goes for strIngrediet
 
     console.log(`Ingredient ${i}:`, ingredient);
     console.log(`Measure ${i}:`, measure);
