@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class MealController {
@@ -40,6 +42,37 @@ public class MealController {
     public ResponseEntity<Meal> addCustomMeal(@RequestBody Meal meal) {
         Meal savedMeal = mealService.addCustomMeal(meal);
         return ResponseEntity.ok(savedMeal);
+    }
+
+    @Value("${themealdb.api.url}")
+    private String themealdbApiUrl;
+
+    @GetMapping("api/meals/filter")
+    public ResponseEntity<?> filterMeals(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String area) {
+
+        // Ensure only one filter is applied at a time
+        if ((category == null || category.isEmpty()) && (area == null || area.isEmpty())) {
+            return ResponseEntity.badRequest().body("At least one filter (category or area) must be specified.");
+        }
+
+        String filterEndpoint;
+
+        if (category != null && !category.isEmpty()) {
+            filterEndpoint = themealdbApiUrl + "/filter.php?c=" + category;
+        } else {
+            filterEndpoint = themealdbApiUrl + "/filter.php?a=" + area;
+        }
+
+        // Fetch filtered meals from TheMealDB API
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            ResponseEntity<String> response = restTemplate.getForEntity(filterEndpoint, String.class);
+            return ResponseEntity.ok(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error fetching filtered meals: " + e.getMessage());
+        }
     }
 
     @GetMapping("/api/meals")
