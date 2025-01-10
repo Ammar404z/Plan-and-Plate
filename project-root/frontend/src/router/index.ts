@@ -20,7 +20,11 @@ const routes = [
     name: "WeeklyPlans",
     component: WeeklyPlansView,
   },
-  { path: "/shopping-list", name: "ShoppingList", component: ShoppingListView },
+  {
+    path: "/shopping-list/:planId",
+    name: "ShoppingList",
+    component: ShoppingListView,
+  },
   { path: "/statistics", name: "Statisticsview", component: StatisticsView },
   { path: "/add-meal", name: "AddMeal", component: AddMeal },
 ];

@@ -1,24 +1,27 @@
 <template>
   <div class="shopping-list-view">
     <h1>Shopping List</h1>
-    <div class="scaling-input">
-      <label for="scaling">Scaling Factor:</label>
-      <input
-        id="scaling"
-        type="number"
-        min="1"
-        v-model.number="scalingFactor"
-        placeholder="Enter scaling factor"
-      />
+    <div v-if="shoppingList.length > 0">
+      <div v-for="meal in shoppingList" :key="meal.mealName" class="meal-group">
+        <h3>{{ meal.day }} - {{ meal.mealName }}</h3>
+        <div class="meal-scaling">
+          <label for="scaling">Portion Size:</label>
+          <input
+            type="number"
+            v-model.number="meal.scalingFactor"
+            @input="updateMealScaling(meal)"
+            placeholder="Enter portion size"
+            min="1"
+          />
+        </div>
+        <ul>
+          <li v-for="ingredient in meal.ingredients" :key="ingredient.name">
+            {{ ingredient.name }}: {{ ingredient.scaledQuantity }}
+          </li>
+        </ul>
+      </div>
     </div>
-    <button @click="generateShoppingList(route.query.planId)">
-      Generate Shopping List
-    </button>
-    <ul>
-      <li v-for="(quantity, ingredient) in shoppingList" :key="ingredient">
-        {{ ingredient }}: {{ quantity }}
-      </li>
-    </ul>
+    <p v-else>Loading shopping list or no meals available...</p>
   </div>
 </template>
 
@@ -26,121 +29,100 @@
 import api from "@/api";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
-
-const shoppingList = ref<Record<string, string | number>>({});
-const scalingFactor = ref<number>(1); // Default scaling factor
-const route = useRoute();
-
-async function generateShoppingList(planId: number | string) {
-  if (!scalingFactor.value || scalingFactor.value < 1) {
-    alert("Please enter a valid scaling factor (greater than or equal to 1).");
-    return;
-  }
-  try {
-    const response = await api.get(`/api/shopping-list/${planId}`, {
-      params: { multiplier: scalingFactor.value }, // Pass scaling factor as a query parameter
-    });
-    console.log("Generated Shopping List:", response.data);
-    shoppingList.value = response.data;
-  } catch (error) {
-    console.error("Error generating shopping list:", error);
-    alert("Failed to generate shopping list. Please try again.");
-  }
+interface Ingredient {
+  name: string;
+  quantity: string;
+  scaledQuantity: string;
 }
 
-onMounted(async () => {
+interface Meal {
+  day: string;
+  mealName: string;
+  scalingFactor: number;
+  ingredients: Ingredient[];
+}
+
+const shoppingList = ref<Meal[]>([]);
+const route = useRoute();
+
+// Fetch the shopping list grouped by meals
+async function fetchShoppingList() {
   try {
-    const response = await api.get(`/api/shopping-list/${route.query.planId}`, {
-      params: { multiplier: scalingFactor.value }, // Fetch with default scaling factor
-    });
-    shoppingList.value = response.data;
+    const planId = route.params.planId; // Access planId from the route params
+    if (!planId) {
+      console.error("Plan ID is undefined. Cannot fetch shopping list.");
+      return;
+    }
+    console.log("Fetching shopping list for planId:", planId);
+
+    const response = await api.get(`/api/shopping-list/${planId}`);
+    console.log("Backend Response:", response.data);
+
+    // Map the backend data to the expected structure
+    shoppingList.value = response.data.map((meal: any) => ({
+      ...meal,
+      ingredients: Object.entries(
+        meal.ingredients as Record<string, string>
+      ).map(([name, quantity]: [string, string]) => ({
+        name,
+        quantity,
+        scaledQuantity: quantity, // Initialize with the original quantity
+      })),
+    }));
+    console.log("Processed Shopping List:", shoppingList.value);
   } catch (error) {
     console.error("Failed to fetch shopping list:", error);
   }
+}
+// Update ingredient quantities when the scaling factor changes
+function updateMealScaling(meal: any) {
+  meal.ingredients.forEach((ingredient: any) => {
+    const [amount, unit] = ingredient.quantity.split(" ");
+    ingredient.scaledQuantity = `${(
+      parseFloat(amount) * meal.scalingFactor
+    ).toFixed(2)} ${unit || ""}`;
+  });
+}
+
+// Fetch shopping list on mount
+onMounted(() => {
+  fetchShoppingList();
 });
 </script>
 
 <style scoped>
-.shopping-list-view {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f9f9f9; /* Light background color */
-  border-radius: 8px; /* Rounded corners */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+.meal-group {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
 }
 
-/* Styling for the header */
-h1 {
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 2rem;
-  font-weight: bold;
+.meal-group h3 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
   color: #333;
 }
 
-/* Styling for the scaling input section */
-.scaling-input {
+.meal-scaling {
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
-.scaling-input label {
-  font-size: 1rem;
+.meal-scaling label {
   margin-right: 10px;
+  font-size: 1rem;
   color: #555;
 }
 
-.scaling-input input {
+.meal-scaling input {
   padding: 8px;
   font-size: 1rem;
   border: 1px solid #ddd;
   border-radius: 4px;
   width: 100px;
   text-align: center;
-}
-
-/* Styling for the list of ingredients */
-ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 20px 0;
-  font-size: 1rem;
-  color: #555;
-}
-
-li {
-  margin: 8px 0;
-  padding: 8px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Light shadow for each list item */
-}
-
-/* Styling for the generate button */
-button {
-  display: block;
-  margin: 20px auto;
-  padding: 12px 24px;
-  font-size: 1rem;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-button:hover {
-  background-color: #0056b3;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add depth on hover */
-}
-
-button:active {
-  background-color: #004494;
-  box-shadow: none; /* Remove shadow on click */
 }
 </style>

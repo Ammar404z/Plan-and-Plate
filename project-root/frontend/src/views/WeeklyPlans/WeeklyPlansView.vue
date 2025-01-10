@@ -94,8 +94,7 @@ function createWeeklyPlan() {
 // Function to navigate to the Shopping List View
 function navigateToShoppingList(planId: number) {
   router.push({
-    path: "/shopping-list",
-    query: { planId },
+    path: `/shopping-list/${planId}`, // Include `planId` in the path
   });
 }
 
