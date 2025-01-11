@@ -38,13 +38,14 @@ public class MealService {
 
     /*
      * TODO:
-     * - handle the statistcs implementation like above
+     * - handle the statistcs implementation like above, and set the default
+     * category if not set upon creation
      */
     public Meal addCustomMeal(Meal meal) {
         // Check if a meal with the same name already exists
         Meal existingMeal = mealRepository.findByName(meal.getName());
         if (existingMeal != null) {
-            throw new RuntimeException("A meal with th same name already exists.");
+            throw new RuntimeException("A meal with the same name already exists.");
         }
 
         // set the default thumbnail for the new custom meal

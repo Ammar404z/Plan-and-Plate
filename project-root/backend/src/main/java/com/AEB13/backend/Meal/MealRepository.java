@@ -20,4 +20,7 @@ public interface MealRepository extends CrudRepository<Meal, Long> {
 
     @Query("SELECT SUM(m.savedCount) FROM Meal m")
     long sumAllSavedCounts();
+
+    @Query("SELECT m.category, COUNT(m) FROM Meal m WHERE m.savedCount > 0 GROUP BY m.category")
+    List<Object[]> countMealsByCategory();
 }

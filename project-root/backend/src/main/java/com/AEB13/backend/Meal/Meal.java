@@ -26,6 +26,8 @@ public class Meal {
 
     private String thumbnail;
 
+    private String category;
+
     @Column
     private int savedCount = 0;
 
@@ -33,6 +35,13 @@ public class Meal {
     private int cookedCount = 0;
 
     // Getters and setters
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
 
     public int getCookedCount() {
         return cookedCount;

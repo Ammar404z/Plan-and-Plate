@@ -2,19 +2,9 @@
   <div class="statistics-view">
     <h1>Statistics</h1>
 
-    <!-- Top 5 Most Saved Recipes -->
-    <div v-if="topSavedMeals.length">
-      <h2>Top 5 Most Saved Recipes</h2>
-      <ul>
-        <li v-for="meal in topSavedMeals" :key="meal.id">
-          <p><strong>Name:</strong> {{ meal.name }}</p>
-          <p><strong>Times Saved:</strong> {{ meal.savedCount }}</p>
-        </li>
-      </ul>
-    </div>
-    <div v-else>
-      <p>No data available for the most saved recipes.</p>
-    </div>
+    <!-- Category Statistics -->
+    <h2>Saved Meals by Category</h2>
+    <canvas id="categoryChart"></canvas>
 
     <!-- Total Saved Count -->
     <div>
@@ -26,16 +16,49 @@
 
 <script setup lang="ts">
 import api from "@/api"; // Your Axios instance
+import Chart from "chart.js/auto";
 import { onMounted, ref } from "vue";
 
-const topSavedMeals = ref([]);
+const categoryDistribution = ref({});
+const chartInstance = ref(null);
 const totalSavedCount = ref(0);
 
 onMounted(async () => {
   try {
-    // Fetch top saved meals
-    const topSavedResponse = await api.get("/api/statistics/top-saved-recipes");
-    topSavedMeals.value = topSavedResponse.data.slice(0, 5);
+    // Fetch the category distribution
+    const distributionResponse = await api.get(
+      "/api/statistics/category-distribution"
+    );
+    categoryDistribution.value = distributionResponse.data;
+
+    // Create Pie Chart
+    const ctx = document.getElementById("categoryChart").getContext("2d");
+    const categories = Object.keys(categoryDistribution.value);
+    const counts = Object.values(categoryDistribution.value);
+
+    chartInstance.value = new Chart(ctx, {
+      type: "pie",
+      data: {
+        labels: categories,
+        datasets: [
+          {
+            label: "Saved Meals by Category",
+            data: counts,
+            backgroundColor: [
+              "#FF6384",
+              "#36A2EB",
+              "#FFCE56",
+              "#4BC0C0",
+              "#9966FF",
+              "#FF9F40",
+            ],
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+      },
+    });
 
     // Fetch total saved count
     const totalSavedResponse = await api.get(
@@ -140,5 +163,10 @@ li p strong {
   li p {
     font-size: 14px;
   }
+}
+
+canvas {
+  margin: 20px auto;
+  max-width: 600px;
 }
 </style>

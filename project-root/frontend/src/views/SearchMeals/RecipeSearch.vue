@@ -55,6 +55,7 @@ interface Meal {
   ingredients: string;
   instructions: string;
   thumbnail: string;
+  category: string;
   [key: string]: any; // we do this to allow dynamic ingredient keys like strIngredient1, strMeasure1, etc...
 }
 
@@ -131,6 +132,7 @@ async function searchMeals() {
         thumbnail: meal.strMealThumb, // Map strMealThumb to thumbnail
         instructions: meal.strInstructions || "No instructions available.", // Map strInstructions to instructions
         ingredients: extractIngredients(meal), // Dynamically extract ingredients
+        category: meal.strCategory || "Unknown", // Map strCategory to category
       }));
     } catch (error) {
       console.error("Error fetching meals:", error);
@@ -172,6 +174,7 @@ async function saveRecipe(meal: Meal) {
       ingredients: extractIngredients(fullMeal), // Extract ingredients dynamically
       instructions: fullMeal.strInstructions || "No instructions available.",
       thumbnail: fullMeal.strMealThumb,
+      category: fullMeal.strCategory || "Unknown", // Extract category dynamically
     };
 
     console.log("Payload being sent:", recipe); // Debug log
