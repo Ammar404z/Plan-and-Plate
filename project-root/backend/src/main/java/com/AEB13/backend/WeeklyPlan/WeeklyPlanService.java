@@ -59,31 +59,89 @@ public class WeeklyPlanService {
 
     private void parseAndAggregateIngredients(String ingredients, Map<String, Double> consolidatedIngredients,
             int multiplier) {
-        String[] items = ingredients.split(","); // Split by comma to get individual items
+        String[] items = ingredients.split(",");
 
         for (String item : items) {
-            String[] parts = item.split(" - "); // Split by " - " to separate ingredient name and quantity
+            String[] parts = item.split(" - ");
             if (parts.length == 2) {
-                String ingredient = parts[0].trim(); // Ingredient name
-                String quantityString = parts[1].trim(); // Quantity (e.g., "2 cups" or "pinch")
+                String ingredient = parts[0].trim();
+                String quantityString = parts[1].trim();
 
                 try {
-                    // Handle numeric quantities with units
-                    String[] quantityParts = quantityString.split(" ", 2);
+                    // Enhanced regex pattern to handle fractions (including ¼, ½, ¾) and various
+                    // unit formats
+                    java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
+                            "^([\\d./¼½¾]+)\\s*([a-zA-Z]+|tsp|tbsp|kg|g|ml|oz|cup|teaspoon|tablespoon)?\\s*(\\(.*\\))?$",
+                            java.util.regex.Pattern.CASE_INSENSITIVE);
+                    java.util.regex.Matcher matcher = pattern.matcher(quantityString);
 
-                    double quantity = parseFraction(quantityParts[0]) * multiplier; // Handle fractions like "1/2"
-                    String unit = quantityParts.length > 1 ? quantityParts[1].trim() : ""; // Extract unit if present
+                    if (matcher.find()) {
+                        String numericPart = matcher.group(1);
+                        String unit = matcher.group(2) != null ? normalizeUnit(matcher.group(2)) : "";
+                        String extraInfo = matcher.group(3) != null ? matcher.group(3).trim() : "";
 
-                    // Add to the consolidated map
-                    String key = ingredient + (unit.isEmpty() ? "" : " (" + unit + ")");
-                    consolidatedIngredients.merge(key, quantity, (oldVal, newVal) -> Math.max(0, oldVal + newVal));
+                        // Convert special fraction characters to numeric values
+                        numericPart = convertSpecialFractions(numericPart);
 
+                        double quantity = parseFraction(numericPart) * multiplier;
+
+                        // Combine unit with any extra information (like "Medium" for eggs)
+                        String fullUnit = unit + (extraInfo.isEmpty() ? "" : " " + extraInfo);
+
+                        // Add to the consolidated map
+                        String key = ingredient + (fullUnit.isEmpty() ? "" : " (" + fullUnit + ")");
+                        consolidatedIngredients.merge(key, quantity, (oldVal, newVal) -> Math.max(0, oldVal + newVal));
+                    } else {
+                        // Handle non-numeric quantities (e.g., "Dusting")
+                        String key = ingredient + " (" + quantityString + ")";
+                        consolidatedIngredients.putIfAbsent(key, -1.0);
+                    }
                 } catch (NumberFormatException e) {
-                    // Handle non-numeric quantities (e.g., "pinch", "splash")
+                    // Handle non-numeric quantities
                     String key = ingredient + " (" + quantityString + ")";
-                    consolidatedIngredients.putIfAbsent(key, -1.0); // Ensure non-scalable keys are added only once
+                    consolidatedIngredients.putIfAbsent(key, -1.0);
                 }
             }
+        }
+    }
+
+    private String convertSpecialFractions(String input) {
+        return input
+                .replace("¼", "1/4")
+                .replace("½", "1/2")
+                .replace("¾", "3/4");
+    }
+
+    private String normalizeUnit(String unit) {
+        if (unit == null)
+            return "";
+
+        unit = unit.toLowerCase().trim();
+        switch (unit) {
+            case "tsp":
+            case "teaspoon":
+                return "tsp";
+            case "tbsp":
+            case "tablespoon":
+                return "tbsp";
+            case "g":
+            case "gram":
+            case "grams":
+                return "g";
+            case "kg":
+            case "kilogram":
+            case "kilograms":
+                return "kg";
+            case "ml":
+            case "milliliter":
+            case "milliliters":
+                return "ml";
+            case "oz":
+            case "ounce":
+            case "ounces":
+                return "oz";
+            default:
+                return unit;
         }
     }
 

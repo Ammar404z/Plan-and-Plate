@@ -77,10 +77,23 @@ async function fetchShoppingList() {
 // Update ingredient quantities when the scaling factor changes
 function updateMealScaling(meal: any) {
   meal.ingredients.forEach((ingredient: any) => {
-    const [amount, unit] = ingredient.quantity.split(" ");
-    ingredient.scaledQuantity = `${(
-      parseFloat(amount) * meal.scalingFactor
-    ).toFixed(2)} ${unit || ""}`;
+    // Check if the quantity contains "original measurement"
+    if (ingredient.quantity.includes("original measurement")) {
+      // Update the scaled quantity to reflect the scaling factor
+      ingredient.scaledQuantity = `${meal.scalingFactor}x original measurement`;
+    } else {
+      // Split the quantity into numeric and unit parts if possible
+      const [amount, unit] = ingredient.quantity.split(" ");
+      if (!isNaN(parseFloat(amount))) {
+        // Scale the numeric value and append the unit
+        ingredient.scaledQuantity = `${(
+          parseFloat(amount) * meal.scalingFactor
+        ).toFixed(2)} ${unit || ""}`.trim();
+      } else {
+        // If splitting fails, retain the original quantity
+        ingredient.scaledQuantity = ingredient.quantity;
+      }
+    }
   });
 }
 
