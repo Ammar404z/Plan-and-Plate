@@ -162,7 +162,7 @@ function extractIngredients(meal: any): string {
 
 async function saveRecipe(meal: Meal) {
   try {
-    // Fetch full meal details by id from the backend or API
+    // Fetch full meal details by id from the backend or API(we have to do that because the filtered meals for example dont contain the full meal details)
     const response = await api.get(
       `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.id}`
     );

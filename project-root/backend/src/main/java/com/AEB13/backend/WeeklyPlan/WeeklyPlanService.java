@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,8 @@ public class WeeklyPlanService {
 
     @Autowired
     private WeeklyPlanRepository weeklyPlanRepository;
+
+    private static final Logger logger = LoggerFactory.getLogger(WeeklyPlanService.class);
 
     @Autowired
     private MealRepository mealRepository;
@@ -35,23 +39,49 @@ public class WeeklyPlanService {
                 .orElseThrow(() -> new IllegalArgumentException("Weekly Plan not found"));
 
         List<Map<String, Object>> shoppingList = new ArrayList<>();
+        List<String> skippedMeals = new ArrayList<>();
 
-        for (String day : weeklyPlan.getMeals().keySet()) {
-            Long mealId = weeklyPlan.getMeals().get(day);
-            Meal meal = mealRepository.findById(mealId)
-                    .orElseThrow(() -> new IllegalArgumentException("Meal not found"));
+        for (Map.Entry<String, Long> entry : weeklyPlan.getMeals().entrySet()) {
+            String day = entry.getKey();
+            Long mealId = entry.getValue();
 
-            // Parse and scale ingredients for the current meal
-            Map<String, Double> ingredientsMap = new HashMap<>();
-            parseAndAggregateIngredients(meal.getIngredients(), ingredientsMap, defaultMultiplier);
+            try {
+                Optional<Meal> mealOptional = mealRepository.findById(mealId);
 
-            // Add meal details to the shopping list
-            Map<String, Object> mealDetails = new HashMap<>();
-            mealDetails.put("day", day);
-            mealDetails.put("mealName", meal.getName());
-            mealDetails.put("ingredients", formatShoppingList(ingredientsMap, defaultMultiplier)); // Format ingredients
-            mealDetails.put("scalingFactor", defaultMultiplier); // Add scaling factor for frontend control
-            shoppingList.add(mealDetails);
+                if (mealOptional.isEmpty()) {
+                    skippedMeals.add(day);
+                    continue;
+                }
+
+                Meal meal = mealOptional.get();
+
+                // Parse and scale ingredients for the current meal
+                Map<String, Double> ingredientsMap = new HashMap<>();
+                parseAndAggregateIngredients(meal.getIngredients(), ingredientsMap, defaultMultiplier);
+
+                // Add meal details to the shopping list
+                Map<String, Object> mealDetails = new HashMap<>();
+                mealDetails.put("day", day);
+                mealDetails.put("mealName", meal.getName());
+                mealDetails.put("ingredients", formatShoppingList(ingredientsMap, defaultMultiplier));
+                mealDetails.put("scalingFactor", defaultMultiplier);
+
+                // Add skipped meals information if any
+                if (!skippedMeals.isEmpty()) {
+                    mealDetails.put("skippedMeals", skippedMeals);
+                }
+
+                shoppingList.add(mealDetails);
+
+            } catch (Exception e) {
+                // Log the error and continue with next meal
+                logger.warn("Failed to process meal for {}: {}", day, e.getMessage());
+                skippedMeals.add(day);
+            }
+        }
+
+        if (shoppingList.isEmpty()) {
+            throw new IllegalStateException("No valid meals found in the weekly plan");
         }
 
         return shoppingList;

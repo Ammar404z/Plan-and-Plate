@@ -1,6 +1,15 @@
 <template>
   <div class="shopping-list-view">
     <h1>Shopping List</h1>
+
+    <!-- Show skipped meals warning if any -->
+    <div v-if="skippedMeals.length > 0" class="skipped-meals-warning">
+      <p>Some meals were not found and have been skipped:</p>
+      <ul>
+        <li v-for="day in skippedMeals" :key="day">{{ day }}</li>
+      </ul>
+    </div>
+
     <div v-if="shoppingList.length > 0">
       <div v-for="meal in shoppingList" :key="meal.mealName" class="meal-group">
         <h3>{{ meal.day }} - {{ meal.mealName }}</h3>
@@ -29,6 +38,7 @@
 import api from "@/api";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+
 interface Ingredient {
   name: string;
   quantity: string;
@@ -43,22 +53,27 @@ interface Meal {
 }
 
 const shoppingList = ref<Meal[]>([]);
+const skippedMeals = ref<string[]>([]); //  ref for skipped meals
 const route = useRoute();
 
 // Fetch the shopping list grouped by meals
 async function fetchShoppingList() {
   try {
-    const planId = route.params.planId; // Access planId from the route params
+    const planId = route.params.planId;
     if (!planId) {
       console.error("Plan ID is undefined. Cannot fetch shopping list.");
       return;
     }
-    console.log("Fetching shopping list for planId:", planId);
 
     const response = await api.get(`/api/shopping-list/${planId}`);
     console.log("Backend Response:", response.data);
 
-    // Map the backend data to the expected structure
+    // Extract skipped meals if present in the first meal
+    if (response.data[0]?.skippedMeals) {
+      skippedMeals.value = response.data[0].skippedMeals;
+    }
+
+    // Map the backend data as before
     shoppingList.value = response.data.map((meal: any) => ({
       ...meal,
       ingredients: Object.entries(
@@ -66,10 +81,9 @@ async function fetchShoppingList() {
       ).map(([name, quantity]: [string, string]) => ({
         name,
         quantity,
-        scaledQuantity: quantity, // Initialize with the original quantity
+        scaledQuantity: quantity,
       })),
     }));
-    console.log("Processed Shopping List:", shoppingList.value);
   } catch (error) {
     console.error("Failed to fetch shopping list:", error);
   }
@@ -137,5 +151,19 @@ onMounted(() => {
   border-radius: 4px;
   width: 100px;
   text-align: center;
+}
+
+.skipped-meals-warning {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #fff3cd;
+  border: 1px solid #ffeeba;
+  border-radius: 8px;
+  color: #856404;
+}
+
+.skipped-meals-warning ul {
+  margin: 10px 0 0 20px;
+  padding: 0;
 }
 </style>
