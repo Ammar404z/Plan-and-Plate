@@ -22,6 +22,9 @@
         <button @click="navigateToShoppingList(plan.id)">
           Generate Shopping List
         </button>
+
+        <!-- Edit Plan Button -->
+        <button @click="navigateToEditPlan(plan.id)">Edit Plan</button>
       </div>
     </div>
     <p v-else>No weekly plans available.</p>
@@ -96,6 +99,10 @@ function navigateToShoppingList(planId: number) {
   router.push({
     path: `/shopping-list/${planId}`, // Include `planId` in the path
   });
+}
+
+function navigateToEditPlan(planId: number) {
+  router.push(`/create-weekly-plans/${planId}`);
 }
 
 // Fetch data on component mount

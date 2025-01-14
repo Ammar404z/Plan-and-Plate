@@ -4,6 +4,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import SavedMeals from "../views/SavedMeals/SavedMeals.vue";
 import RecipeSearch from "../views/SearchMeals/RecipeSearch.vue";
 import CreateWeeklyPlans from "../views/WeeklyPlans/CreateWeeklyPlans.vue";
+import EditWeeklyPlan from "../views/WeeklyPlans/EditWeeklyPlan.vue";
 import ShoppingListView from "../views/WeeklyPlans/ShoppingListView.vue";
 import WeeklyPlansView from "../views/WeeklyPlans/WeeklyPlansView.vue";
 
@@ -27,6 +28,11 @@ const routes = [
   },
   { path: "/statistics", name: "Statisticsview", component: StatisticsView },
   { path: "/add-meal", name: "AddMeal", component: AddMeal },
+  {
+    path: "/create-weekly-plans/:planId",
+    name: "EditWeeklyPlan",
+    component: EditWeeklyPlan,
+  },
 ];
 
 const router = createRouter({
