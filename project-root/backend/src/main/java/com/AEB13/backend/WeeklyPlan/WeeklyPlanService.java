@@ -1,10 +1,14 @@
 package com.AEB13.backend.WeeklyPlan;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -223,9 +227,34 @@ public class WeeklyPlanService {
         return shoppingList;
     }
 
+    /**
+     * Sorts the meal plan by day of the week.
+     * 
+     * @param meals The map with meal IDs as keys and cooked counts as values.
+     * @return A sorted map with meal IDs as keys and cooked counts as values.
+     */
+    private Map<String, Long> sortDays(Map<String, Long> meals) {
+        List<String> dayOrder = Arrays.asList("Monday,", "Tuesday,", "Wednesday", "Thursday", "Friday", "Saturday",
+                "Sunday");
+        return meals.entrySet()
+                .stream()
+                .sorted(Comparator.comparingInt(entry -> dayOrder.indexOf(entry.getKey())))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new));
+    }
+
     public WeeklyPlan getWeeklyPlan(Long id) {
-        return weeklyPlanRepository.findById(id)
+        WeeklyPlan weeklyPlan = weeklyPlanRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Plan with ID " + id + " not found"));
+
+        // Sort the meals within the weekly plan by day
+        Map<String, Long> sortedMeals = sortDays(weeklyPlan.getMeals());
+        weeklyPlan.setMeals(sortedMeals);
+
+        return weeklyPlan;
     }
 
     public WeeklyPlan createWeeklyPlan(WeeklyPlan weeklyPlan) {
@@ -250,6 +279,18 @@ public class WeeklyPlanService {
     }
 
     public List<WeeklyPlan> getAllWeeklyPlans() {
-        return weeklyPlanRepository.findAll();
+        List<WeeklyPlan> weeklyPlans = weeklyPlanRepository.findAll();
+
+        // Sort the meals in each weekly plan by day
+        weeklyPlans.forEach(plan -> {
+            Map<String, Long> sortedMeals = sortDays(plan.getMeals());
+            plan.setMeals(sortedMeals);
+        });
+
+        // Optionally, sort the weekly plans themselves (e.g., by week number)
+        weeklyPlans.sort(Comparator.comparing(WeeklyPlan::getWeek));
+
+        return weeklyPlans;
+
     }
 }
