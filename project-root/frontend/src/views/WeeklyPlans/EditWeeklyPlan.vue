@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import api from "@/api"; // Replace with your API handling file
+import api from "@/api";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 

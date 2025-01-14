@@ -39,8 +39,7 @@ public class WeeklyPlanService {
      *         scaling factor.
      */
     public List<Map<String, Object>> generateShoppingList(Long weeklyPlanId, int defaultMultiplier) {
-        WeeklyPlan weeklyPlan = weeklyPlanRepository.findById(weeklyPlanId)
-                .orElseThrow(() -> new IllegalArgumentException("Weekly Plan not found"));
+        WeeklyPlan weeklyPlan = getWeeklyPlan(weeklyPlanId);
 
         List<Map<String, Object>> shoppingList = new ArrayList<>();
         List<String> skippedMeals = new ArrayList<>();
