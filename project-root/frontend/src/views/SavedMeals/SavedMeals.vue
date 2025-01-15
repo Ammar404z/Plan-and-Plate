@@ -1,20 +1,32 @@
 <template>
   <div class="saved-meals">
-    <h1>Your Saved Meals</h1>
-    <button @click="navigateToAddMeal" class="add-meal-btn">
-      Add Custom Meal
-    </button>
+    <!-- Title with a box and custom font -->
+    <div class="title-box">
+      <h1>Your Saved Meals</h1>
+    </div>
+
+    <!-- Add Custom Meal Button -->
+    <div class="add-meal-container">
+      <button @click="navigateToAddMeal" class="add-meal-btn">
+        Add Custom Meal
+      </button>
+    </div>
+
+    <!-- List of saved meals -->
     <ul v-if="meals.length > 0" class="meal-list">
       <li v-for="meal in meals" :key="meal.id" class="meal-card">
-        <img :src="meal.thumbnail" alt="Meal Thumbnail" class="meal-image" />
-        <div class="meal-info">
+        <!-- Header row with image next to title -->
+        <div class="meal-header">
+          <img :src="meal.thumbnail" alt="Meal Thumbnail" class="meal-image" />
           <h3 class="meal-title">{{ meal.name }}</h3>
-          <p><strong>Ingredients:</strong> {{ meal.ingredients }}</p>
-          <p><strong>Instructions:</strong> {{ meal.instructions }}</p>
-          <button @click="deleteMeal(meal.id)">Delete</button>
         </div>
+        <p><strong>Ingredients:</strong> {{ meal.ingredients }}</p>
+        <p><strong>Instructions:</strong> {{ meal.instructions }}</p>
+        <button @click="deleteMeal(meal.id)">Delete Meal</button>
       </li>
     </ul>
+
+    <!-- No meals saved -->
     <p v-else class="no-results">No meals saved yet.</p>
   </div>
 </template>
@@ -22,7 +34,8 @@
 <script setup lang="ts">
 import api from "@/api";
 import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router"; // Import the router to navigate
+import { useRouter } from "vue-router";
+
 
 // Define the structure of a saved meal
 interface Meal {
@@ -39,6 +52,7 @@ const router = useRouter();
 function navigateToAddMeal() {
   router.push("/add-meal");
 }
+
 
 // Fetch saved meals on component mount
 async function fetchMeals() {
@@ -65,7 +79,38 @@ onMounted(fetchMeals);
 </script>
 
 <style scoped>
+
 /* Styling similar to Recipe Search */
+.saved-meals {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Title Box Styling */
+.title-box {
+  background-color: #f0f8ff; /* Light blue background */
+  border: 2px solid #007bff; /* Blue border */
+  padding: 10px 20px;
+  border-radius: 10px;
+  display: inline-block;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  margin-bottom: 10px;
+}
+
+.title-box h1 {
+  font-size: 1.8rem; /* Adjusted size for balance */
+  margin: 0;
+  color: #333;
+  font-family: 'Georgia', serif; /* Add a classy font */
+  text-align: center;
+}
+
+/* Add Meal Button Styling */
+.add-meal-container {
+  margin-top: 10px; /* Add some space between title and button */
+}
 
 .add-meal-btn {
   background-color: #007bff;
@@ -74,24 +119,13 @@ onMounted(fetchMeals);
   padding: 10px 15px;
   cursor: pointer;
   border-radius: 5px;
-  margin-bottom: 20px;
   transition: background-color 0.3s;
+  width: 100%; /* Full-width button */
+  max-width: 300px; /* Restrict maximum width */
 }
 
 .add-meal-btn:hover {
   background-color: #0056b3;
-}
-.saved-meals {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  text-align: center;
-}
-
-h1 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-  color: #333;
 }
 
 .meal-list {
@@ -105,33 +139,29 @@ h1 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.meal-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-}
-
-.meal-image {
-  width: 150px;
-  height: 150px;
-  object-fit: cover;
-  border-right: 1px solid #ccc;
-}
-
-.meal-info {
   padding: 15px;
-  flex: 1;
   text-align: left;
 }
 
+/* Header row for image + title side-by-side */
+.meal-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.meal-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  margin-right: 15px;
+  border-radius: 8px;
+}
+
 .meal-title {
-  font-size: 1.2rem;
-  color: #007bff;
-  margin: 0 0 10px;
+  font-size: 1.3rem;
+  color: #e60026; /* lava-red for consistency with nav */
+  margin: 0;
 }
 
 button {

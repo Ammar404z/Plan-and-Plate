@@ -1,12 +1,16 @@
 <template>
-  <div>
-    <h1>Weekly Plans</h1>
+  <div class="weekly-plans-container">
+    <!-- Title with a box -->
+    <div class="title-box">
+      <h1>Weekly Plans</h1>
+    </div>
 
     <!-- Create Meal Plan Button -->
     <div class="create-button">
       <button @click="createWeeklyPlan">Create Meal Plan</button>
     </div>
 
+    <!-- Weekly Plans List -->
     <div v-if="weeklyPlans.length > 0">
       <div v-for="plan in weeklyPlans" :key="plan.id" class="weekly-plan">
         <h2>Week {{ plan.week }}</h2>
@@ -15,14 +19,12 @@
             {{ day }}: {{ getMealName(mealId) }}
           </li>
         </ul>
-        <!-- Delete Plan Button -->
+        <!-- Buttons for each plan -->
         <button @click="deletePlan(plan.id)">Delete Plan</button>
-
         <!-- Generate Shopping List Button -->
         <button @click="navigateToShoppingList(plan.id)">
           Generate Shopping List
         </button>
-
         <!-- Edit Plan Button -->
         <button @click="navigateToEditPlan(plan.id)">Edit Plan</button>
       </div>
@@ -115,18 +117,26 @@ onMounted(async () => {
 <style scoped>
 /* General container styling for the view */
 .weekly-plans-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centers the content horizontally */
 }
 
-/* Section title styling */
-h1 {
+/* Title Box Styling */
+.title-box {
+  background-color: #f0f8ff; /* Light blue background */
+  border: 2px solid #007bff; /* Blue border */
+  padding: 10px 20px;
+  border-radius: 10px;
+  display: inline-block;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  margin: 20px auto; /* Add auto margin for centering */
   text-align: center;
-  margin-bottom: 30px;
-  font-size: 2rem;
+}
+
+.title-box h1 {
+  font-size: 2rem; /* Adjusted size for title */
+  margin: 0;
   color: #007bff;
 }
 
