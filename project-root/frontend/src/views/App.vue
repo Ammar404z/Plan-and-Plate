@@ -62,22 +62,22 @@ export default {
 .header {
   background-color: #89cff0; /* Light blue */
   display: flex;
-  align-items: center; /* Ensures vertical alignment of items */
-  justify-content: start; /* Align logo and text to the left */
-  padding: 0.5rem 1.5rem; /* Reduced padding for a shorter height */
-  height: 60px; /* Decrease the height to make it shorter */
-  box-sizing: border-box; /* Includes padding in the total height */
-  overflow: hidden; /* Prevents elements from overflowing */
+  align-items: center; /* Center items vertically */
+  justify-content: center; /* Center items horizontally */
+  padding: 0.5rem 1.5rem;
+  height: 100px; /* Increase height slightly for more space */
+  box-sizing: border-box; /* Includes padding in height calculation */
 }
 
 .logo {
-  height: 40px; /* Adjust logo size to fit within the smaller header */
+  height: 60px; /* Make the logo slightly larger */
   width: auto; /* Maintain aspect ratio */
   margin-right: 1rem; /* Space between logo and title */
+
 }
 
 .app-title {
-  font-size: 2rem; /* Adjust font size to fit the shorter header */
+  font-size: 2.2rem; /* Slightly increase font size */
   font-weight: 700; /* Keep bold text */
 }
 

@@ -1,7 +1,7 @@
 <template>
   <div class="search-container">
     <!-- Title with a ref -->
-    <h1 ref="titleRef">Recipe Search</h1>
+    <h1 ref="titleRef">Find Recipes For Your Meals</h1>
 
     <!-- Filters with a ref for the dropdown -->
     <div class="filters">
@@ -100,8 +100,31 @@ async function fetchFilters() {
   }
 }
 
+async function fetchAllMeals() {
+  try {
+    const response = await api.get("/api/meals");
+    meals.value = response.data.map((meal: any) => ({
+      id: meal.id,
+      name: meal.name,
+      thumbnail: meal.thumbnail,
+      instructions: meal.instructions || "No instructions available.",
+      ingredients: meal.ingredients,
+      category: meal.category || "Unknown",
+    }));
+  } catch (error) {
+    console.error("Error fetching all meals:", error);
+  }
+}
+
 async function applyFilters() {
   try {
+    // If no filter is selected (All Filters), fetch all meals:
+    if (!selectedFilter.value) {
+      await fetchAllMeals();
+      return; // Stop here, since we don't need to call the filter endpoint
+    }
+
+    // Otherwise, proceed with normal filtering:
     let url = "/api/meals/filter";
     const params = new URLSearchParams();
 
@@ -128,6 +151,7 @@ async function applyFilters() {
     console.error("Error applying filters:", error);
   }
 }
+
 
 async function searchMeals() {
   if (query.value) {
@@ -204,13 +228,14 @@ async function saveRecipe(meal: Meal) {
 
 /* Heading (title) Styling */
 h1 {
-  font-size: 2rem;
-  margin-bottom: 20px;
+  font-size: 2.2rem; /* Slightly larger for emphasis */
+  margin-bottom: 10px; /* Reduce space below the title */
+  margin-top: 20px; /* Add space above the title */
   color: #333;
   text-align: center;
 
   /* Box styling */
-  padding: 10px 20px;
+  padding: 15px 25px;
   border: 2px solid #89cff0;
   border-radius: 10px;
   background-color: #f0f8ff;
@@ -274,6 +299,27 @@ h1 {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
+
+/* Save Recipe Button Styling */
+.meal-info button {
+  background-color: #007bff; /* Blue background */
+  color: white; /* White text */
+  border: none;
+  padding: 10px 15px;
+  font-size: 1rem; /* Increase font size */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Elegant font */
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.meal-info button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
+  transform: translateY(-2px); /* Lift effect */
+}
+
+
 /* Meal Image */
 .meal-image {
   width: 100%;
@@ -288,7 +334,7 @@ h1 {
 }
 .meal-title {
   font-size: 1.2rem;
-  color: #89cff0;
+  color: #61c8ca;
   margin: 0 0 10px;
 }
 .meal-instructions {

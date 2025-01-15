@@ -22,7 +22,7 @@
         </div>
         <p><strong>Ingredients:</strong> {{ meal.ingredients }}</p>
         <p><strong>Instructions:</strong> {{ meal.instructions }}</p>
-        <button @click="deleteMeal(meal.id)">Delete</button>
+        <button @click="deleteMeal(meal.id)">Delete Meal</button>
       </li>
     </ul>
 
