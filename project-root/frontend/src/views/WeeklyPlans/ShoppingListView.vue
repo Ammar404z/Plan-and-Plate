@@ -76,7 +76,7 @@ async function fetchShoppingList() {
       skippedMeals.value = response.data[0].skippedMeals;
     }
 
-    // Map the backend data
+    // Map the backend data as before
     shoppingList.value = response.data.map((meal: any) => ({
       ...meal,
       ingredients: Object.entries(meal.ingredients).map(([name, quantity]) => ({
@@ -92,6 +92,8 @@ async function fetchShoppingList() {
 
 // Update ingredient quantities when the scaling factor changes
 function updateMealScaling(meal: any) {
+
+  // Check if the quantity contains "original measurement"
   meal.ingredients.forEach((ingredient: any) => {
     if (ingredient.quantity.includes("original measurement")) {
       // Update the scaled quantity to reflect the scaling factor
@@ -100,6 +102,7 @@ function updateMealScaling(meal: any) {
       // Try to parse the numeric + unit parts
       const [amount, unit] = ingredient.quantity.split(" ");
       if (!isNaN(parseFloat(amount))) {
+        // Scale the numeric value and append the unit
         ingredient.scaledQuantity = `${(
             parseFloat(amount) * meal.scalingFactor
         ).toFixed(2)} ${unit || ""}`.trim();
@@ -111,6 +114,7 @@ function updateMealScaling(meal: any) {
   });
 }
 
+// Fetch shopping list on mount
 onMounted(() => {
   fetchShoppingList();
 });

@@ -36,6 +36,8 @@ import api from "@/api";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
+
+// Define the structure of a saved meal
 interface Meal {
   id: string;
   name: string;
@@ -51,6 +53,8 @@ function navigateToAddMeal() {
   router.push("/add-meal");
 }
 
+
+// Fetch saved meals on component mount
 async function fetchMeals() {
   try {
     const response = await api.get("/api/meals");
@@ -75,6 +79,8 @@ onMounted(fetchMeals);
 </script>
 
 <style scoped>
+
+/* Styling similar to Recipe Search */
 .saved-meals {
   max-width: 800px;
   margin: 0 auto;

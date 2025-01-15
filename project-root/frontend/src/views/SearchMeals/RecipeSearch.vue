@@ -26,17 +26,19 @@
     />
 
     <!-- Results -->
+    <!-- Wrapper element with v-if applied -->
+
     <div v-if="meals.length > 0" class="results">
       <div class="meal-card" v-for="meal in meals" :key="meal.id">
         <img :src="meal.thumbnail" alt="Meal Image" class="meal-image" />
         <div class="meal-info">
           <h3 class="meal-title">{{ meal.name }}</h3>
+          <!-- Save Recipe Button -->
           <button @click="saveRecipe(meal)">Save Recipe</button>
         </div>
       </div>
     </div>
-
-    <!-- No results -->
+    <!-- Show "No results found" if query is entered and no meals are found -->
     <p v-else-if="query && meals.length === 0" class="no-results">
       No results found.
     </p>
@@ -50,6 +52,7 @@ import { onMounted, ref } from "vue";
 /* -----------------------------
    TypeScript Interfaces
 ----------------------------- */
+//Define the structure of a Meal from TheMealDB API
 interface Meal {
   id: string;
   name: string;
@@ -69,6 +72,8 @@ const dropdownRef = ref<HTMLElement | null>(null);
 const query = ref("");
 const meals = ref<Meal[]>([]);
 
+
+//for filtering purposes
 const combinedFilters = ref<{ type: string; value: string }[]>([]);
 const selectedFilter = ref<string>("");
 
@@ -88,9 +93,14 @@ onMounted(() => {
 /* -----------------------------
    Functions
 ----------------------------- */
+
+// fetch the filters to be displayed in the dropdown menu
 async function fetchFilters() {
   try {
+    // Fetch combined categories and areas from the backend
     const response = await api.get("/api/meals/categoriesAndAreas");
+
+    // Populate the combinedFilters array
     combinedFilters.value = response.data.filters.map((filter: any) => ({
       type: filter.type,
       value: filter.value,
@@ -100,6 +110,7 @@ async function fetchFilters() {
   }
 }
 
+// Fetch all saved meals on component mount
 async function fetchAllMeals() {
   try {
     const response = await api.get("/api/meals");
@@ -128,6 +139,7 @@ async function applyFilters() {
     let url = "/api/meals/filter";
     const params = new URLSearchParams();
 
+    // Determine if the selected filter is a category or area
     const selected = combinedFilters.value.find(
         (filter) => filter.value === selectedFilter.value
     );
@@ -141,6 +153,8 @@ async function applyFilters() {
     }
 
     url += `?${params.toString()}`;
+
+    // Fetch filtered meals
     const response = await api.get(url);
     meals.value = (response.data.meals || []).map((meal: any) => ({
       id: meal.idMeal,
@@ -160,6 +174,7 @@ async function searchMeals() {
         params: { name: query.value },
       });
 
+      // Map API response to your custom field names (Issue #3)
       meals.value = (response.data.meals || []).map((meal: any) => ({
         id: meal.idMeal,
         name: meal.strMeal,
@@ -195,11 +210,15 @@ function extractIngredients(meal: any): string {
 
 async function saveRecipe(meal: Meal) {
   try {
+    // Fetch full meal details by id from the backend or API(we have to do that because
+    // the filtered meals for example don't contain the full meal details)
+
     const response = await api.get(
         `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.id}`
     );
     const fullMeal = response.data.meals[0];
 
+    // Map the full meal details to the recipe payload
     const recipe = {
       name: fullMeal.strMeal || "Unnamed Recipe",
       ingredients: extractIngredients(fullMeal),
@@ -208,6 +227,7 @@ async function saveRecipe(meal: Meal) {
       category: fullMeal.strCategory || "Unknown",
     };
 
+    // Send the full meal details to the backend
     const saveResponse = await api.post("/api/meals/add", recipe);
     alert(`Recipe "${saveResponse.data.name}" saved successfully.`);
   } catch (error) {

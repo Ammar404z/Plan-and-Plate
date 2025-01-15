@@ -81,6 +81,8 @@ export default {
   font-weight: 700; /* Keep bold text */
 }
 
+
+/* General Styling for Navigation Bar */
 /* NAV BACKGROUND */
 .nav-background {
   background: linear-gradient(

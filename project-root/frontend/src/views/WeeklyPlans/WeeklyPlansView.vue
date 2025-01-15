@@ -21,9 +21,11 @@
         </ul>
         <!-- Buttons for each plan -->
         <button @click="deletePlan(plan.id)">Delete Plan</button>
+        <!-- Generate Shopping List Button -->
         <button @click="navigateToShoppingList(plan.id)">
           Generate Shopping List
         </button>
+        <!-- Edit Plan Button -->
         <button @click="navigateToEditPlan(plan.id)">Edit Plan</button>
       </div>
     </div>
