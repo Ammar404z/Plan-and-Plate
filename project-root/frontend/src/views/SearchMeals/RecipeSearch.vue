@@ -1,16 +1,19 @@
 <template>
   <div class="search-container">
     <!-- Title with a ref -->
-    <h1 ref="titleRef">Find Recipes For Your Meals</h1>
+
+    <button class="random-meal-button" @click="fetchRandomMeal">
+      Get Random Meal
+    </button>
 
     <!-- Filters with a ref for the dropdown -->
     <div class="filters">
       <select ref="dropdownRef" v-model="selectedFilter" @change="applyFilters">
         <option value="">All Filters</option>
         <option
-            v-for="filter in combinedFilters"
-            :key="filter.type + filter.value"
-            :value="filter.value"
+          v-for="filter in combinedFilters"
+          :key="filter.type + filter.value"
+          :value="filter.value"
         >
           {{ filter.type }}: {{ filter.value }}
         </option>
@@ -19,10 +22,10 @@
 
     <!-- Search bar -->
     <input
-        v-model="query"
-        placeholder="Search for a recipe"
-        @input="searchMeals"
-        class="search-input"
+      v-model="query"
+      placeholder="Search for a recipe"
+      @input="searchMeals"
+      class="search-input"
     />
 
     <!-- Results -->
@@ -71,7 +74,6 @@ const dropdownRef = ref<HTMLElement | null>(null);
 
 const query = ref("");
 const meals = ref<Meal[]>([]);
-
 
 //for filtering purposes
 const combinedFilters = ref<{ type: string; value: string }[]>([]);
@@ -141,7 +143,7 @@ async function applyFilters() {
 
     // Determine if the selected filter is a category or area
     const selected = combinedFilters.value.find(
-        (filter) => filter.value === selectedFilter.value
+      (filter) => filter.value === selectedFilter.value
     );
 
     if (selected) {
@@ -165,7 +167,6 @@ async function applyFilters() {
     console.error("Error applying filters:", error);
   }
 }
-
 
 async function searchMeals() {
   if (query.value) {
@@ -199,13 +200,13 @@ function extractIngredients(meal: any): string {
 
     if (ingredient && ingredient.trim() !== "") {
       ingredients.push(
-          `${ingredient.trim()} - ${measure?.trim() || "as needed"}`
+        `${ingredient.trim()} - ${measure?.trim() || "as needed"}`
       );
     }
   }
   return ingredients.length > 0
-      ? ingredients.join(", ")
-      : "No ingredients available.";
+    ? ingredients.join(", ")
+    : "No ingredients available.";
 }
 
 async function saveRecipe(meal: Meal) {
@@ -214,7 +215,7 @@ async function saveRecipe(meal: Meal) {
     // the filtered meals for example don't contain the full meal details)
 
     const response = await api.get(
-        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.id}`
+      `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.id}`
     );
     const fullMeal = response.data.meals[0];
 
@@ -235,9 +236,50 @@ async function saveRecipe(meal: Meal) {
     alert("Failed to save recipe. Please try again.");
   }
 }
+async function fetchRandomMeal() {
+  try {
+    const response = await api.get(
+      "https://www.themealdb.com/api/json/v1/1/random.php"
+    );
+    const randomMeal = response.data.meals[0];
+
+    const meal = {
+      id: randomMeal.idMeal,
+      name: randomMeal.strMeal,
+      thumbnail: randomMeal.strMealThumb,
+      instructions: randomMeal.strInstructions || "No instructions available.",
+      ingredients: extractIngredients(randomMeal),
+      category: randomMeal.strCategory || "Unknown",
+    };
+
+    meals.value = [meal]; // Replace the meals array with the random meal
+    console.log("Random meal fetched:", meal);
+  } catch (error) {
+    console.error("Error fetching random meal:", error);
+    alert("Failed to fetch a random meal. Please try again.");
+  }
+}
 </script>
 
 <style scoped>
+/* Random Meal Button */
+.random-meal-button {
+  padding: 10px 15px;
+  font-size: 1rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  margin-bottom: 10px; /* Add spacing below the button */
+}
+
+.random-meal-button:hover {
+  background-color: #218838;
+  transform: translateY(-2px);
+}
+
 /* Container Styling */
 .search-container {
   max-width: 800px;
@@ -319,7 +361,6 @@ h1 {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-
 /* Save Recipe Button Styling */
 .meal-info button {
   background-color: #007bff; /* Blue background */
@@ -338,7 +379,6 @@ h1 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
   transform: translateY(-2px); /* Lift effect */
 }
-
 
 /* Meal Image */
 .meal-image {
