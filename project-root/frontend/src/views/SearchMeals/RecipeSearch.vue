@@ -63,6 +63,7 @@ interface Meal {
   instructions: string;
   thumbnail: string;
   category: string;
+  youTubeVid: string;
   [key: string]: any;
 }
 
@@ -183,6 +184,7 @@ async function searchMeals() {
         instructions: meal.strInstructions || "No instructions available.",
         ingredients: extractIngredients(meal),
         category: meal.strCategory || "Unknown",
+        youTubeVid: meal.strYoutube || "",
       }));
     } catch (error) {
       console.error("Error fetching meals:", error);
@@ -226,6 +228,7 @@ async function saveRecipe(meal: Meal) {
       instructions: fullMeal.strInstructions || "No instructions available.",
       thumbnail: fullMeal.strMealThumb,
       category: fullMeal.strCategory || "Unknown",
+      youTubeVid: fullMeal.strYoutube || "", // save the link for the additional feature 2
     };
 
     // Send the full meal details to the backend
@@ -250,6 +253,7 @@ async function fetchRandomMeal() {
       instructions: randomMeal.strInstructions || "No instructions available.",
       ingredients: extractIngredients(randomMeal),
       category: randomMeal.strCategory || "Unknown",
+      youTubeVid: randomMeal.strYoutube || "", // save the link for the additional feature 2
     };
 
     meals.value = [meal]; // Replace the meals array with the random meal

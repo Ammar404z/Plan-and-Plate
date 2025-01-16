@@ -23,6 +23,13 @@
         <p><strong>Ingredients:</strong> {{ meal.ingredients }}</p>
         <p><strong>Instructions:</strong> {{ meal.instructions }}</p>
         <button @click="deleteMeal(meal.id)">Delete Meal</button>
+        <button
+          v-if="meal.youTubeVid"
+          @click="watchYouTubeVid(meal.youTubeVid)"
+          class="youtube-button"
+        >
+          ► Watch Video
+        </button>
       </li>
     </ul>
 
@@ -36,7 +43,6 @@ import api from "@/api";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
-
 // Define the structure of a saved meal
 interface Meal {
   id: string;
@@ -44,6 +50,8 @@ interface Meal {
   ingredients: string;
   instructions: string;
   thumbnail: string;
+  category: string;
+  youTubeVid: string;
 }
 
 const meals = ref<Meal[]>([]);
@@ -53,12 +61,16 @@ function navigateToAddMeal() {
   router.push("/add-meal");
 }
 
+async function watchYouTubeVid(youTubeVid: string) {
+  window.open(youTubeVid, "_blank");
+}
 
 // Fetch saved meals on component mount
 async function fetchMeals() {
   try {
     const response = await api.get("/api/meals");
     meals.value = response.data;
+    console.log(response);
   } catch (error) {
     console.error("Error fetching meals:", error);
   }
@@ -79,7 +91,23 @@ onMounted(fetchMeals);
 </script>
 
 <style scoped>
+.youtube-button {
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  position: absolute; /* Allow placement within the card */
+  bottom: 10px; /* Align with the bottom */
+  right: 10px; /* Align with the right */
+}
 
+.youtube-button:hover {
+  background-color: #cc0000;
+}
 /* Styling similar to Recipe Search */
 .saved-meals {
   max-width: 800px;
@@ -103,7 +131,7 @@ onMounted(fetchMeals);
   font-size: 1.8rem; /* Adjusted size for balance */
   margin: 0;
   color: #333;
-  font-family: 'Georgia', serif; /* Add a classy font */
+  font-family: "Georgia", serif; /* Add a classy font */
   text-align: center;
 }
 
@@ -134,6 +162,7 @@ onMounted(fetchMeals);
 }
 
 .meal-card {
+  position: relative; /* Enable positioning for the child elements */
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -141,6 +170,7 @@ onMounted(fetchMeals);
   overflow: hidden;
   padding: 15px;
   text-align: left;
+  min-height: 200px; /* Ensure sufficient height for the button placement */
 }
 
 /* Header row for image + title side-by-side */

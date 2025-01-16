@@ -28,6 +28,8 @@ public class Meal {
 
     private String category;
 
+    private String youTubeVid;
+
     @Column
     private int savedCount = 0;
 
@@ -97,6 +99,14 @@ public class Meal {
 
     public void setInstructions(String instructions) {
         this.instructions = instructions;
+    }
+
+    public String getYouTubeVid() {
+        return youTubeVid;
+    }
+
+    public void setYouTubeVid(String youTubeVid) {
+        this.youTubeVid = youTubeVid;
     }
 
 }
