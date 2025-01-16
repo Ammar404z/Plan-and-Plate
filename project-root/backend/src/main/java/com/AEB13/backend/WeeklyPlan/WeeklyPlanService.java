@@ -228,12 +228,12 @@ public class WeeklyPlanService {
 
     /**
      * Sorts the meal plan by day of the week.
-     * 
-     * @param meals The map with meal IDs as keys and cooked counts as values.
-     * @return A sorted map with meal IDs as keys and cooked counts as values.
+     *
+     * @param meals The map with days as keys and meal IDs as values.
+     * @return A sorted map with days as keys and meal IDs as values.
      */
     private Map<String, Long> sortDays(Map<String, Long> meals) {
-        List<String> dayOrder = Arrays.asList("Monday,", "Tuesday,", "Wednesday", "Thursday", "Friday", "Saturday",
+        List<String> dayOrder = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
                 "Sunday");
         return meals.entrySet()
                 .stream()

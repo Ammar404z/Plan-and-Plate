@@ -12,9 +12,19 @@
       </button>
     </div>
 
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input
+        type="text"
+        v-model="searchQuery"
+        placeholder="Search saved meals..."
+        class="search-bar"
+      />
+    </div>
+
     <!-- List of saved meals -->
-    <ul v-if="meals.length > 0" class="meal-list">
-      <li v-for="meal in meals" :key="meal.id" class="meal-card">
+    <ul v-if="filteredMeals.length > 0" class="meal-list">
+      <li v-for="meal in filteredMeals" :key="meal.id" class="meal-card">
         <!-- Header row with image next to title -->
         <div class="meal-header">
           <img :src="meal.thumbnail" alt="Meal Thumbnail" class="meal-image" />
@@ -34,14 +44,14 @@
       </li>
     </ul>
 
-    <!-- No meals saved -->
-    <p v-else class="no-results">No meals saved yet.</p>
+    <!-- No meals found -->
+    <p v-else class="no-results">No meals found.</p>
   </div>
 </template>
 
 <script setup lang="ts">
 import api from "@/api";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 
 // Define the structure of a saved meal
@@ -56,6 +66,7 @@ interface Meal {
 }
 
 const meals = ref<Meal[]>([]);
+const searchQuery = ref(""); // Search query
 const router = useRouter();
 
 function navigateToAddMeal() {
@@ -91,10 +102,40 @@ async function viewMeal(mealId) {
   router.push(`/view-meal/${mealId}`);
 }
 
+// Computed property to filter meals based on the search query
+const filteredMeals = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return meals.value;
+  }
+  return meals.value.filter((meal) =>
+    meal.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
 onMounted(fetchMeals);
 </script>
 
 <style scoped>
+.search-container {
+  margin: 20px 0;
+  text-align: center;
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  outline: none;
+}
+
+.search-bar:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
 .youtube-button {
   background-color: #ff0000;
   color: white;
