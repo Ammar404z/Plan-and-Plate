@@ -38,6 +38,8 @@
           <h3 class="meal-title">{{ meal.name }}</h3>
           <!-- Save Recipe Button -->
           <button @click="saveRecipe(meal)">Save Recipe</button>
+          <button @click="viewMeal(meal.id)">View Meal</button>
+          <button @click="shareMeal(meal.id)">Share</button>
         </div>
       </div>
     </div>
@@ -51,6 +53,7 @@
 <script setup lang="ts">
 import api from "@/api";
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
 /* -----------------------------
    TypeScript Interfaces
@@ -66,6 +69,7 @@ interface Meal {
   youTubeVid: string;
   [key: string]: any;
 }
+const router = useRouter();
 
 /* -----------------------------
    Refs & Reactive Data
@@ -223,6 +227,7 @@ async function saveRecipe(meal: Meal) {
 
     // Map the full meal details to the recipe payload
     const recipe = {
+      id: fullMeal.idMeal,
       name: fullMeal.strMeal || "Unnamed Recipe",
       ingredients: extractIngredients(fullMeal),
       instructions: fullMeal.strInstructions || "No instructions available.",
@@ -262,6 +267,16 @@ async function fetchRandomMeal() {
     console.error("Error fetching random meal:", error);
     alert("Failed to fetch a random meal. Please try again.");
   }
+}
+async function viewMeal(mealId) {
+  router.push(`/view-meal/${mealId}`);
+}
+
+async function shareMeal(mealId) {
+  const shareLink = `${window.location.origin}/view-meal/${mealId}`;
+  navigator.clipboard.writeText(shareLink).then(() => {
+    alert("Link copied to clipboard!");
+  });
 }
 </script>
 

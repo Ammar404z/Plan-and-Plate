@@ -1,4 +1,5 @@
 import AddMeal from "@/views/SavedMeals/AddMeal.vue";
+import ViewMeal from "@/views/SearchMeals/ViewMeal.vue";
 import StatisticsView from "@/views/Statistics/StatisticsView.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import SavedMeals from "../views/SavedMeals/SavedMeals.vue";
@@ -32,6 +33,11 @@ const routes = [
     path: "/create-weekly-plans/:planId",
     name: "EditWeeklyPlan",
     component: EditWeeklyPlan,
+  },
+  {
+    path: "/view-meal/:id",
+    name: "ViewMeal",
+    component: ViewMeal,
   },
 ];
 

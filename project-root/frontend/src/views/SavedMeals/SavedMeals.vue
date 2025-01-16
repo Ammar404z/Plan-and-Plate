@@ -30,6 +30,7 @@
         >
           ► Watch Video
         </button>
+        <button @click="viewMeal(meal.id)">View Meal</button>
       </li>
     </ul>
 
@@ -85,6 +86,9 @@ async function deleteMeal(id: string) {
     console.error("Error deleting meal:", error);
     alert("Failed to delete meal.");
   }
+}
+async function viewMeal(mealId) {
+  router.push(`/view-meal/${mealId}`);
 }
 
 onMounted(fetchMeals);
