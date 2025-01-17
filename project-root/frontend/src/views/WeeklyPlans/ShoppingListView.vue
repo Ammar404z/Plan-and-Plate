@@ -135,7 +135,7 @@ function getIngredientThumbnail(ingredientName: string): string {
 
 function setDefaultThumbnail(event: Event): void {
   const target = event.target as HTMLImageElement;
-  target.src = require("@/assets/grocery.png");
+  target.src = require("@/assets/grocery.png"); // use default thumbnail for ingredients for custom meals(when no thumbnail from the api can be found)
 }
 
 // Fetch shopping list on mount

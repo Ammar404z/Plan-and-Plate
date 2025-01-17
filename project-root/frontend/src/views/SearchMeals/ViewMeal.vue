@@ -55,15 +55,16 @@
 </template>
 
 <script setup lang="ts">
+import api from "@/api";
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import api from "@/api";
 
 const route = useRoute();
 const router = useRouter();
 const mealId = route.params.id;
 
 const meal = ref({
+  apiId: "",
   name: "",
   thumbnail: "",
   ingredients: [],
@@ -79,6 +80,7 @@ onMounted(async () => {
     );
     const data = response.data.meals[0];
     meal.value = {
+      apiId: data.idMeal,
       name: data.strMeal,
       thumbnail: data.strMealThumb,
       ingredients: extractIngredients(data),
@@ -109,8 +111,28 @@ function extractIngredients(data) {
   return ingredients;
 }
 
-function saveRecipe() {
-  alert(`Saving recipe: ${meal.value.name}`);
+async function saveRecipe() {
+  try {
+    // Map the meal data to the recipe payload
+    const recipe = {
+      apiId: meal.value.apiId, // Ensure the API ID is saved if relevant
+      name: meal.value.name,
+      ingredients: meal.value.ingredients
+        .map((ingredient) => `${ingredient.name} - ${ingredient.measure}`)
+        .join(", "),
+      instructions: meal.value.instructions || "No instructions available.",
+      thumbnail: meal.value.thumbnail,
+      category: meal.value.category || "Unknown",
+      youTubeVid: meal.value.youTubeVid || "", // Save the link for additional features
+    };
+
+    // Send the recipe to the backend
+    const response = await api.post("/api/meals/add", recipe);
+    alert(`Recipe "${response.data.name}" saved successfully.`);
+  } catch (error) {
+    console.error("Error saving recipe:", error);
+    alert("Failed to save recipe. Please try again.");
+  }
 }
 
 function shareMeal() {
