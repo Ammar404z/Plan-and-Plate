@@ -24,13 +24,25 @@
           />
         </div>
         <ul>
-          <li v-for="ingredient in meal.ingredients" :key="ingredient.name">
+          <li
+            v-for="ingredient in meal.ingredients"
+            :key="ingredient.name"
+            class="ingredient-item"
+          >
+            <input
+              type="checkbox"
+              v-model="ingredient.isChecked"
+              class="ingredient-checkbox"
+            />
             <img
               :src="getIngredientThumbnail(ingredient.name)"
               :alt="ingredient.name"
               class="ingredient-thumbnail"
+              @error="setDefaultThumbnail($event)"
             />
-            {{ ingredient.name }}: {{ ingredient.scaledQuantity }}
+            <span :class="{ checked: ingredient.isChecked }">
+              {{ ingredient.name }}: {{ ingredient.scaledQuantity }}
+            </span>
           </li>
         </ul>
       </div>
@@ -38,7 +50,6 @@
     <p v-else>Loading shopping list or no meals available...</p>
   </div>
 </template>
-
 <script setup lang="ts">
 import api from "@/api";
 import { onMounted, ref } from "vue";
@@ -48,6 +59,7 @@ interface Ingredient {
   name: string;
   quantity: string;
   scaledQuantity: string;
+  isChecked: boolean;
 }
 
 interface Meal {
@@ -85,6 +97,7 @@ async function fetchShoppingList() {
         name,
         quantity,
         scaledQuantity: quantity,
+        isChecked: false, // Default to unchecked
       })),
     }));
   } catch (error) {
@@ -118,6 +131,11 @@ function updateMealScaling(meal: any) {
 function getIngredientThumbnail(ingredientName: string): string {
   const formattedName = ingredientName.split(" (")[0].trim(); // Format name for API
   return `https://www.themealdb.com/images/ingredients/${formattedName}.png`;
+}
+
+function setDefaultThumbnail(event: Event): void {
+  const target = event.target as HTMLImageElement;
+  target.src = require("@/assets/grocery.png");
 }
 
 // Fetch shopping list on mount
@@ -154,8 +172,8 @@ onMounted(() => {
 }
 
 .ingredient-thumbnail {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   margin-right: 10px;
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -205,5 +223,9 @@ onMounted(() => {
   border-radius: 4px;
   width: 100px;
   text-align: center;
+}
+.checked {
+  text-decoration: line-through;
+  color: #999;
 }
 </style>

@@ -228,6 +228,7 @@ async function saveRecipe(meal: Meal) {
     // Map the full meal details to the recipe payload
     const recipe = {
       id: fullMeal.idMeal,
+      apiId: fullMeal.idMeal, // we need to save this to be able to access the meal from the favorite meals tab
       name: fullMeal.strMeal || "Unnamed Recipe",
       ingredients: extractIngredients(fullMeal),
       instructions: fullMeal.strInstructions || "No instructions available.",

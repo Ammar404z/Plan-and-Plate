@@ -30,6 +30,13 @@
           <img :src="meal.thumbnail" alt="Meal Thumbnail" class="meal-image" />
           <h3 class="meal-title">{{ meal.name }}</h3>
         </div>
+
+        <!-- Details for custom meals -->
+        <div v-if="!meal.apiId" class="meal-details">
+          <p><strong>Ingredients:</strong> {{ meal.ingredients }}</p>
+          <p><strong>Instructions:</strong> {{ meal.instructions }}</p>
+        </div>
+
         <button @click="deleteMeal(meal.id)">Delete Meal</button>
         <button
           v-if="meal.youTubeVid"
@@ -38,7 +45,9 @@
         >
           ► Watch Video
         </button>
-        <button @click="viewMeal(meal.id)">View Meal</button>
+        <button v-if="meal.apiId" @click="viewMeal(meal.apiId)">
+          View Meal
+        </button>
       </li>
     </ul>
 
@@ -55,6 +64,7 @@ import { useRouter } from "vue-router";
 // Define the structure of a saved meal
 interface Meal {
   id: string;
+  apiId: string;
   name: string;
   ingredients: string;
   instructions: string;
@@ -96,7 +106,7 @@ async function deleteMeal(id: string) {
     alert("Failed to delete meal.");
   }
 }
-async function viewMeal(mealId: number) {
+async function viewMeal(mealId) {
   router.push(`/view-meal/${mealId}`);
 }
 

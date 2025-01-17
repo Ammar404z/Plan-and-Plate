@@ -2,6 +2,8 @@ package com.AEB13.backend.Meal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -10,6 +12,7 @@ import jakarta.persistence.Table;
 public class Meal {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -26,6 +29,8 @@ public class Meal {
     private String category;
 
     private String youTubeVid;
+
+    private String apiId; // Optional field for API meal ID
 
     @Column
     private int savedCount = 0;
@@ -104,6 +109,14 @@ public class Meal {
 
     public void setYouTubeVid(String youTubeVid) {
         this.youTubeVid = youTubeVid;
+    }
+
+    public String getApiId() {
+        return apiId;
+    }
+
+    public void setApiId(String apiId) {
+        this.apiId = apiId;
     }
 
 }
