@@ -16,18 +16,20 @@
         <div class="meal-scaling">
           <label for="scaling">Portion Size:</label>
           <input
-              type="number"
-              v-model.number="meal.scalingFactor"
-              @input="updateMealScaling(meal)"
-              placeholder="Enter portion size"
-              min="1"
+            type="number"
+            v-model.number="meal.scalingFactor"
+            @input="updateMealScaling(meal)"
+            placeholder="Enter portion size"
+            min="1"
           />
         </div>
         <ul>
-          <li
-              v-for="ingredient in meal.ingredients"
-              :key="ingredient.name"
-          >
+          <li v-for="ingredient in meal.ingredients" :key="ingredient.name">
+            <img
+              :src="getIngredientThumbnail(ingredient.name)"
+              :alt="ingredient.name"
+              class="ingredient-thumbnail"
+            />
             {{ ingredient.name }}: {{ ingredient.scaledQuantity }}
           </li>
         </ul>
@@ -92,7 +94,6 @@ async function fetchShoppingList() {
 
 // Update ingredient quantities when the scaling factor changes
 function updateMealScaling(meal: any) {
-
   // Check if the quantity contains "original measurement"
   meal.ingredients.forEach((ingredient: any) => {
     if (ingredient.quantity.includes("original measurement")) {
@@ -104,7 +105,7 @@ function updateMealScaling(meal: any) {
       if (!isNaN(parseFloat(amount))) {
         // Scale the numeric value and append the unit
         ingredient.scaledQuantity = `${(
-            parseFloat(amount) * meal.scalingFactor
+          parseFloat(amount) * meal.scalingFactor
         ).toFixed(2)} ${unit || ""}`.trim();
       } else {
         // If no numeric part, keep it unchanged
@@ -112,6 +113,11 @@ function updateMealScaling(meal: any) {
       }
     }
   });
+}
+// Generate thumbnail URL for ingredients
+function getIngredientThumbnail(ingredientName: string): string {
+  const formattedName = ingredientName.split(" (")[0].trim(); // Format name for API
+  return `https://www.themealdb.com/images/ingredients/${formattedName}.png`;
 }
 
 // Fetch shopping list on mount
@@ -125,15 +131,34 @@ onMounted(() => {
   max-width: 800px;
   margin: 20px auto;
   padding: 20px;
-  background-color: #fff; /* White “card” container */
+  background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.ingredients-list {
+  list-style: none;
+  padding: 0;
+}
+
+.ingredient-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 .shopping-list-view h1 {
   text-align: center;
   color: #333;
   margin-bottom: 20px;
+}
+
+.ingredient-thumbnail {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Warn about skipped meals */

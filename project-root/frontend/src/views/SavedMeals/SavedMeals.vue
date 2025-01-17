@@ -30,8 +30,6 @@
           <img :src="meal.thumbnail" alt="Meal Thumbnail" class="meal-image" />
           <h3 class="meal-title">{{ meal.name }}</h3>
         </div>
-        <p><strong>Ingredients:</strong> {{ meal.ingredients }}</p>
-        <p><strong>Instructions:</strong> {{ meal.instructions }}</p>
         <button @click="deleteMeal(meal.id)">Delete Meal</button>
         <button
           v-if="meal.youTubeVid"
@@ -51,7 +49,7 @@
 
 <script setup lang="ts">
 import api from "@/api";
-import { onMounted, ref, computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 // Define the structure of a saved meal
@@ -98,7 +96,7 @@ async function deleteMeal(id: string) {
     alert("Failed to delete meal.");
   }
 }
-async function viewMeal(mealId) {
+async function viewMeal(mealId: number) {
   router.push(`/view-meal/${mealId}`);
 }
 
