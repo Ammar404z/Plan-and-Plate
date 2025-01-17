@@ -39,6 +39,15 @@ const planId = route.params.planId;
 const updatedMeals = ref({});
 const meals = ref([]);
 const plan = ref({});
+const allDays = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 
 // Fetch the weekly plan and available meals
 const fetchPlanAndMeals = async () => {
@@ -46,7 +55,12 @@ const fetchPlanAndMeals = async () => {
     // Fetch weekly plan by ID
     const planResponse = await api.get(`/api/create-weekly-plans/${planId}`);
     plan.value = planResponse.data;
-    updatedMeals.value = { ...plan.value.meals }; // Clone meals for editing
+
+    // Initialize updatedMeals with all days
+    updatedMeals.value = {};
+    allDays.forEach((day) => {
+      updatedMeals.value[day] = plan.value.meals[day] || ""; // Use existing meal or leave it empty
+    });
 
     // Fetch all meals
     const mealsResponse = await api.get("/api/meals");

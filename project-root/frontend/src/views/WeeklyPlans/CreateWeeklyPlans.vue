@@ -30,6 +30,8 @@
 
     <!-- Save Plan Button -->
     <button @click="saveWeeklyPlan">Save Plan</button>
+    <!-- cancel Button -->
+    <button @click="cancel">Cancel</button>
   </div>
 </template>
 
@@ -82,6 +84,15 @@ async function saveWeeklyPlan(): Promise<void> {
     return;
   }
 
+  // Check if at least one meal is selected
+  const hasMeals = Object.values(selectedMeals.value).some(
+    (meal) => meal !== null
+  );
+  if (!hasMeals) {
+    alert("Please assign at least one meal before saving the plan.");
+    return;
+  }
+
   try {
     const response = await api.post("/api/create-weekly-plans", {
       week: selectedWeek.value,
@@ -98,6 +109,9 @@ async function saveWeeklyPlan(): Promise<void> {
       alert("An unexpected error occurred.");
     }
   }
+}
+function cancel() {
+  router.push("/view-weekly-plans");
 }
 </script>
 <style scoped>
