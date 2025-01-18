@@ -11,9 +11,9 @@
       <select ref="dropdownRef" v-model="selectedFilter" @change="applyFilters">
         <option value="">All Filters</option>
         <option
-          v-for="filter in combinedFilters"
-          :key="filter.type + filter.value"
-          :value="filter.value"
+            v-for="filter in combinedFilters"
+            :key="filter.type + filter.value"
+            :value="filter.value"
         >
           {{ filter.type }}: {{ filter.value }}
         </option>
@@ -22,24 +22,29 @@
 
     <!-- Search bar -->
     <input
-      v-model="query"
-      placeholder="Search for a recipe"
-      @input="searchMeals"
-      class="search-input"
+        v-model="query"
+        placeholder="Search for a recipe"
+        @input="searchMeals"
+        class="search-input"
     />
 
     <!-- Results -->
     <!-- Wrapper element with v-if applied -->
-
     <div v-if="meals.length > 0" class="results">
       <div class="meal-card" v-for="meal in meals" :key="meal.id">
         <img :src="meal.thumbnail" alt="Meal Image" class="meal-image" />
         <div class="meal-info">
           <h3 class="meal-title">{{ meal.name }}</h3>
-          <!-- Save Recipe Button -->
-          <button @click="saveRecipe(meal)">Save Recipe</button>
-          <button @click="viewMeal(meal.id)">View Meal</button>
-          <button @click="shareMeal(meal.id)">Share</button>
+          <!-- Buttons in two rows:
+               1) Save Recipe - View Meal
+               2) Share (below, centered) -->
+          <div class="button-row">
+            <button class="meal-button" @click="saveRecipe(meal)">Save Recipe</button>
+            <button class="meal-button" @click="viewMeal(meal.id)">View Meal</button>
+          </div>
+          <div class="share-row">
+            <button class="meal-share-button" @click="shareMeal(meal.id)">Share</button>
+          </div>
         </div>
       </div>
     </div>
@@ -106,8 +111,6 @@ async function fetchFilters() {
   try {
     // Fetch combined categories and areas from the backend
     const response = await api.get("/api/meals/categoriesAndAreas");
-
-    // Populate the combinedFilters array
     combinedFilters.value = response.data.filters.map((filter: any) => ({
       type: filter.type,
       value: filter.value,
@@ -136,21 +139,17 @@ async function fetchAllMeals() {
 
 async function applyFilters() {
   try {
-    // If no filter is selected (All Filters), fetch all meals:
     if (!selectedFilter.value) {
       await fetchAllMeals();
-      return; // Stop here, since we don't need to call the filter endpoint
+      return;
     }
-
-    // Otherwise, proceed with normal filtering:
     let url = "/api/meals/filter";
     const params = new URLSearchParams();
 
     // Determine if the selected filter is a category or area
     const selected = combinedFilters.value.find(
-      (filter) => filter.value === selectedFilter.value
+        (filter) => filter.value === selectedFilter.value
     );
-
     if (selected) {
       if (selected.type === "Category") {
         params.append("category", selected.value);
@@ -158,10 +157,8 @@ async function applyFilters() {
         params.append("area", selected.value);
       }
     }
-
     url += `?${params.toString()}`;
 
-    // Fetch filtered meals
     const response = await api.get(url);
     meals.value = (response.data.meals || []).map((meal: any) => ({
       id: meal.idMeal,
@@ -179,8 +176,6 @@ async function searchMeals() {
       const response = await api.get("/api/meals/search", {
         params: { name: query.value },
       });
-
-      // Map API response to your custom field names (Issue #3)
       meals.value = (response.data.meals || []).map((meal: any) => ({
         id: meal.idMeal,
         name: meal.strMeal,
@@ -203,16 +198,15 @@ function extractIngredients(meal: any): string {
   for (let i = 1; i <= 20; i++) {
     const ingredient = meal[`strIngredient${i}`];
     const measure = meal[`strMeasure${i}`];
-
     if (ingredient && ingredient.trim() !== "") {
       ingredients.push(
-        `${ingredient.trim()} - ${measure?.trim() || "as needed"}`
+          `${ingredient.trim()} - ${measure?.trim() || "as needed"}`
       );
     }
   }
   return ingredients.length > 0
-    ? ingredients.join(", ")
-    : "No ingredients available.";
+      ? ingredients.join(", ")
+      : "No ingredients available.";
 }
 
 async function saveRecipe(meal: Meal) {
@@ -221,7 +215,7 @@ async function saveRecipe(meal: Meal) {
     // the filtered meals for example don't contain the full meal details)
 
     const response = await api.get(
-      `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.id}`
+        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.id}`
     );
     const fullMeal = response.data.meals[0];
 
@@ -234,10 +228,9 @@ async function saveRecipe(meal: Meal) {
       instructions: fullMeal.strInstructions || "No instructions available.",
       thumbnail: fullMeal.strMealThumb,
       category: fullMeal.strCategory || "Unknown",
-      youTubeVid: fullMeal.strYoutube || "", // save the link for the additional feature 2
+      youTubeVid: fullMeal.strYoutube || "",
     };
 
-    // Send the full meal details to the backend
     const saveResponse = await api.post("/api/meals/add", recipe);
     alert(`Recipe "${saveResponse.data.name}" saved successfully.`);
   } catch (error) {
@@ -245,10 +238,11 @@ async function saveRecipe(meal: Meal) {
     alert("Failed to save recipe. Please try again.");
   }
 }
+
 async function fetchRandomMeal() {
   try {
     const response = await api.get(
-      "https://www.themealdb.com/api/json/v1/1/random.php"
+        "https://www.themealdb.com/api/json/v1/1/random.php"
     );
     const randomMeal = response.data.meals[0];
 
@@ -259,21 +253,22 @@ async function fetchRandomMeal() {
       instructions: randomMeal.strInstructions || "No instructions available.",
       ingredients: extractIngredients(randomMeal),
       category: randomMeal.strCategory || "Unknown",
-      youTubeVid: randomMeal.strYoutube || "", // save the link for the additional feature 2
+      youTubeVid: randomMeal.strYoutube || "",
     };
 
-    meals.value = [meal]; // Replace the meals array with the random meal
+    meals.value = [meal];
     console.log("Random meal fetched:", meal);
   } catch (error) {
     console.error("Error fetching random meal:", error);
     alert("Failed to fetch a random meal. Please try again.");
   }
 }
-async function viewMeal(mealId) {
+
+async function viewMeal(mealId: string) {
   router.push(`/view-meal/${mealId}`);
 }
 
-async function shareMeal(mealId) {
+async function shareMeal(mealId: string) {
   const shareLink = `${window.location.origin}/view-meal/${mealId}`;
   navigator.clipboard.writeText(shareLink).then(() => {
     alert("Link copied to clipboard!");
@@ -282,21 +277,27 @@ async function shareMeal(mealId) {
 </script>
 
 <style scoped>
-/* Random Meal Button */
+/* Random Meal Button:
+   - Matches the approximate style/width of the dropdown.
+   - Bordered to mirror the select element's look. */
 .random-meal-button {
-  padding: 10px 15px;
-  font-size: 1rem;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 5px;
+  background-color: #e3f6e8; /* Light green background */
+  font-size: 1.2rem;
+  color: #28a745; /* Green text */
+  border: 2px solid #89cff0;
+  padding: 15px 20px;
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
-  margin-bottom: 10px; /* Add spacing below the button */
+  border-radius: 10px;
+  transition: background-color 0.3s;
+  width: 290px; /* Match the title box width */
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 10px auto;
 }
 
 .random-meal-button:hover {
   background-color: #218838;
+  color: #fff; /* Show white text on hover */
   transform: translateY(-2px);
 }
 
@@ -310,13 +311,11 @@ async function shareMeal(mealId) {
 
 /* Heading (title) Styling */
 h1 {
-  font-size: 2.2rem; /* Slightly larger for emphasis */
-  margin-bottom: 10px; /* Reduce space below the title */
-  margin-top: 20px; /* Add space above the title */
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  margin-top: 20px;
   color: #333;
   text-align: center;
-
-  /* Box styling */
   padding: 15px 25px;
   border: 2px solid #89cff0;
   border-radius: 10px;
@@ -331,26 +330,30 @@ h1 {
   text-align: center;
 }
 
-/* Dropdown styling (no fixed width; now set by JavaScript) */
+/* Dropdown styling */
 .filters select {
-  font-size: 1rem;
-  padding: 10px;
+  background-color: #e3f6e8; /* Light green background */
+  font-size: 1.2rem;
+  color: #28a745; /* Green text */
   border: 2px solid #89cff0;
+  padding: 15px 20px;
+  cursor: pointer;
   border-radius: 10px;
-  background-color: #f0f8ff;
+  transition: background-color 0.3s;
+  width: 290px; /* Match the title box width */
+  text-align: center;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin: 0 auto;
-  display: block;
+  margin: 10px auto;
 }
 
 /* Search Input */
 .search-input {
   padding: 10px;
-  width: 100%;
   max-width: 400px;
   border-radius: 5px;
   border: 1px solid #ccc;
   font-size: 1rem;
+  width: 270px; /* Match the title box width */
   margin-bottom: 20px;
   transition: border-color 0.3s;
 }
@@ -381,25 +384,6 @@ h1 {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Save Recipe Button Styling */
-.meal-info button {
-  background-color: #007bff; /* Blue background */
-  color: white; /* White text */
-  border: none;
-  padding: 10px 15px;
-  font-size: 1rem; /* Increase font size */
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Elegant font */
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.meal-info button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow effect */
-  transform: translateY(-2px); /* Lift effect */
-}
-
 /* Meal Image */
 .meal-image {
   width: 100%;
@@ -412,15 +396,50 @@ h1 {
   padding: 15px;
   text-align: left;
 }
+
+/* Meal Title */
 .meal-title {
   font-size: 1.2rem;
   color: #61c8ca;
   margin: 0 0 10px;
 }
-.meal-instructions {
-  font-size: 0.9rem;
-  color: #555;
-  line-height: 1.4;
+
+/* Button row: Save Recipe & View Meal side by side */
+.button-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* Center the Share button below the button row */
+.share-row {
+  display: flex;
+  justify-content: center; /* Center align the Share button */
+  margin-top: 10px; /* Add space above the Share button */
+}
+
+
+/* Match the color scheme of the Random Meal button for Save/View/Share */
+.meal-button,
+.meal-share-button {
+  font-size: 1rem;
+  padding: 10px;
+  background-color: #e3f6e8; /* Lighter green background */
+  color: #28a745; /* Green text */
+  border: 2px solid #89cff0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 110px; /* Slight fixed width so each button is balanced */
+  text-align: center; /* Center text on each button */
+}
+
+.meal-button:hover,
+.meal-share-button:hover {
+  background-color: #218838;
+  color: #fff; /* White text on hover */
+  transform: translateY(-2px);
 }
 
 /* No Results */

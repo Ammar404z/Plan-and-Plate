@@ -7,7 +7,7 @@
 
     <!-- Create Meal Plan Button -->
     <div class="create-button">
-      <button @click="createWeeklyPlan">Create Meal Plan</button>
+      <button @click="createWeeklyPlan" class="action-button">Create Meal Plan</button>
     </div>
 
     <!-- Weekly Plans List -->
@@ -20,13 +20,15 @@
           </li>
         </ul>
         <!-- Buttons for each plan -->
-        <button @click="deletePlan(plan.id)">Delete Plan</button>
-        <!-- Generate Shopping List Button -->
-        <button @click="navigateToShoppingList(plan.id)">
-          Generate Shopping List
-        </button>
-        <!-- Edit Plan Button -->
-        <button @click="navigateToEditPlan(plan.id)">Edit Plan</button>
+        <div class="button-container">
+          <button @click="deletePlan(plan.id)" class="action-button">Delete Plan</button>
+          <button @click="navigateToShoppingList(plan.id)" class="action-button">
+            Generate Shopping List
+          </button>
+          <button @click="navigateToEditPlan(plan.id)" class="action-button">
+            Edit Plan
+          </button>
+        </div>
       </div>
     </div>
     <p v-else>No weekly plans available.</p>
@@ -120,40 +122,49 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   align-items: center; /* Centers the content horizontally */
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 /* Title Box Styling */
 .title-box {
-  background-color: #f0f8ff; /* Light blue background */
-  border: 2px solid #007bff; /* Blue border */
-  padding: 10px 20px;
-  border-radius: 10px;
-  display: inline-block;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-  margin: 20px auto; /* Add auto margin for centering */
-  text-align: center;
+  font-size: 1.2rem;
+  padding: 15px 20px;
+  background-color: #e3f6e8; /* Lighter green background */
+  color: #28a745; /* Green text */
+  border: 2px solid #89cff0; /* Similar to dropdown */
+  border-radius: 10px; /* Similar to dropdown */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Similar to dropdown */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 250px; /* Match the Add Custom Meal width */
+  margin: 0 auto 10px auto; /* Center and add spacing below */
 }
 
 .title-box h1 {
-  font-size: 2rem; /* Adjusted size for title */
+  font-size: 1.2rem;
   margin: 0;
-  color: #007bff;
+  color: #28a745;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
 }
 
 /* Styling for each weekly plan */
 .weekly-plan {
   margin-bottom: 20px;
-  padding: 15px;
+  padding: 20px;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: #f9f9f9;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 .weekly-plan h2 {
   margin-bottom: 10px;
-  font-size: 1.5rem;
-  color: #0056b3;
+  font-size: 1.rem;
+  color: #28a745;
 }
 
 /* Styling for meal list */
@@ -174,21 +185,26 @@ onMounted(async () => {
   border-bottom: none;
 }
 
-/* Button styling */
-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 15px;
+/* Button Styling */
+.action-button {
+  background-color: #e3f6e8; /* Light green background */
+  color: #28a745; /* Green text */
+  border: 2px solid #89cff0;
+  border-radius: 10px;
+  padding: 10px 20px; /* Uniform padding */
   font-size: 1rem;
   cursor: pointer;
-  border-radius: 5px;
-  margin: 5px;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
+  margin: 5px; /* Space between buttons */
+  width: 200px; /* Set uniform width for all buttons */
+  text-align: center;
+  display: inline-block;
 }
 
-button:hover {
-  background-color: #0056b3;
+.action-button:hover {
+  background-color: #218838; /* Darker green */
+  color: white; /* White text */
+  transform: translateY(-2px); /* Lift effect */
 }
 
 button:disabled {
@@ -204,13 +220,23 @@ button:disabled {
 
 .create-button button {
   font-size: 1.2rem;
-  padding: 10px 20px;
+  padding: 15px 20px;
+  font-weight: bold; /* Add this to make the font thick (bold) */
+  background-color: #e3f6e8; /* Light green background */
+  color: #28a745; /* Green text */
+  border: 2px solid #89cff0; /* Border matching dropdown buttons */
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  text-align: center;
+  width: 290px; /* Uniform width */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Message for no plans available */
 p {
   text-align: center;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   color: #777;
   margin-top: 20px;
 }
@@ -221,9 +247,10 @@ p {
     padding: 10px;
   }
 
-  button {
+  .action-button {
     font-size: 0.9rem;
     padding: 8px 10px;
+    width: 100%; /* Full width on smaller screens */
   }
 }
 </style>
