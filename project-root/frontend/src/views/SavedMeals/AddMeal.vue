@@ -50,6 +50,7 @@
         <input id="thumbnail" v-model="meal.thumbnail" />
       </div>
       <button type="submit">Add Meal</button>
+      <button @click="router.push(`/saved-meals`)" type="submit">Cancel</button>
     </form>
   </div>
 </template>
