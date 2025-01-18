@@ -15,10 +15,10 @@
     <!-- Search Bar -->
     <div class="search-container">
       <input
-          type="text"
-          v-model="searchQuery"
-          placeholder="Search saved meals..."
-          class="search-bar"
+        type="text"
+        v-model="searchQuery"
+        placeholder="Search saved meals..."
+        class="search-bar"
       />
     </div>
 
@@ -32,11 +32,19 @@
     <!-- List of saved meals -->
     <ul v-if="sortedMeals.length > 0" class="meal-list">
       <li v-for="meal in sortedMeals" :key="meal.id" class="meal-card">
-        <!-- Header row with image next to title -->
-        <div class="meal-header">
-          <img :src="meal.thumbnail" alt="Meal Thumbnail" class="meal-image" />
-          <h3 class="meal-title">{{ meal.name }}</h3>
-        </div>
+        <!-- Favorite button positioned in the top-right corner -->
+        <button @click="toggleFavorite(meal)" class="favorite-button">
+          <font-awesome-icon
+            :icon="[meal.favorite ? 'fas' : 'far', 'star']"
+            style="color: #ffd43b; font-size: 2rem"
+          />
+        </button>
+
+        <!-- Thumbnail Image -->
+        <img :src="meal.thumbnail" alt="Meal Thumbnail" class="meal-image" />
+
+        <!-- Title below the thumbnail -->
+        <h3 class="meal-title">{{ meal.name }}</h3>
 
         <!-- Details for custom meals -->
         <div v-if="!meal.apiId" class="meal-details">
@@ -44,15 +52,15 @@
           <p><strong>Instructions:</strong> {{ meal.instructions }}</p>
         </div>
 
-        <!-- Buttons (keeping the original structure) -->
+        <!-- Buttons -->
         <button @click="deleteMeal(meal.id)">Delete Meal</button>
         <button v-if="meal.apiId" @click="viewMeal(meal.apiId)">
           View Meal
         </button>
         <button
-            v-if="meal.youTubeVid"
-            @click="watchYouTubeVid(meal.youTubeVid)"
-            class="youtube-button"
+          v-if="meal.youTubeVid"
+          @click="watchYouTubeVid(meal.youTubeVid)"
+          class="youtube-button"
         >
           ► Watch Video
         </button>
@@ -79,6 +87,7 @@ interface Meal {
   thumbnail: string;
   category: string;
   youTubeVid: string;
+  favorite: boolean;
 }
 
 const meals = ref<Meal[]>([]);
@@ -120,6 +129,16 @@ async function viewMeal(mealId: string) {
   router.push(`/view-meal/${mealId}`);
 }
 
+async function toggleFavorite(meal: Meal) {
+  try {
+    const response = await api.put(`/api/meals/${meal.id}`);
+    const updatedMeal = response.data;
+    meal.favorite = updatedMeal.favorite;
+  } catch (error) {
+    console.error("Error toggling favorite:", error);
+  }
+}
+
 // Method to toggle sorting order
 function toggleSortOrder() {
   sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
@@ -130,7 +149,7 @@ const sortedMeals = computed(() => {
   let filtered = meals.value;
   if (searchQuery.value.trim()) {
     filtered = filtered.filter((meal) =>
-        meal.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+      meal.name.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
   }
   return filtered.sort((a, b) => {
@@ -148,7 +167,7 @@ onMounted(fetchMeals);
 <style scoped>
 /* Container of the entire Saved Meals component */
 .saved-meals {
-  max-width: 800px;
+  max-width: 1200px; /* Increased max width for a wider layout */
   margin: 0 auto;
   padding: 20px;
   text-align: center;
@@ -251,19 +270,22 @@ onMounted(fetchMeals);
 .meal-list {
   list-style: none;
   padding: 0;
+  display: flex; /* Use flex layout for vertical alignment */
+  flex-wrap: wrap; /* Allow multiple rows */
+  gap: 20px; /* Add spacing between meal cards */
+  justify-content: center; /* Center-align meals */
 }
 
 /* Meal Card */
 .meal-card {
-  position: relative;
+  position: relative; /* Ensure the star button is positioned relative to this card */
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-  overflow: hidden;
   padding: 15px;
   text-align: left;
-  min-height: 200px; /* Ensure enough space for info & button */
+  width: 300px; /* Set a fixed width for meal cards */
+  min-height: 350px; /* Ensure consistent height for all cards */
 }
 
 /* Meal Header (Thumbnail + Title) */
@@ -288,9 +310,7 @@ onMounted(fetchMeals);
   font-weight: bold;
 }
 
-/* Buttons in the meal card
-   (except the YouTube button, which has its own class)
-*/
+/* Buttons in the meal card */
 .meal-card button {
   border: none;
   border-radius: 5px;
@@ -303,20 +323,20 @@ onMounted(fetchMeals);
 }
 
 /* Delete Meal */
-.meal-card button:nth-of-type(1) {
+.meal-card button:nth-of-type(2) {
   background-color: #dc3545; /* Red for Delete Meal */
   color: #fff;
 }
-.meal-card button:nth-of-type(1):hover {
+.meal-card button:nth-of-type(2):hover {
   background-color: #c82333;
 }
 
 /* View Meal */
-.meal-card button:nth-of-type(2) {
+.meal-card button:nth-of-type(3) {
   background-color: #007bff; /* Blue for View Meal */
   color: #fff;
 }
-.meal-card button:nth-of-type(2):hover {
+.meal-card button:nth-of-type(3):hover {
   background-color: #0056b3;
 }
 
@@ -337,6 +357,19 @@ onMounted(fetchMeals);
 
 .youtube-button:hover {
   background-color: #cc0000;
+}
+
+/* Favorite button */
+.favorite-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5rem;
+  color: gray;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
 
 /* No Results */

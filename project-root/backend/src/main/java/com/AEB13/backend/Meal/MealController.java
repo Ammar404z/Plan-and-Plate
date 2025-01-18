@@ -3,6 +3,7 @@ package com.AEB13.backend.Meal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -135,5 +137,18 @@ public class MealController {
         List<Meal> meals = mealRepository.findTop5ByOrderBySavedCountDesc();
         System.out.println("Top saved meals: " + meals); // Debug log
         return meals;
+    }
+
+    @PutMapping("/api/meals/{id}")
+    public ResponseEntity<Meal> toggleFavorite(@PathVariable Long id) {
+        Optional<Meal> mealOptional = mealRepository.findById(id);
+        if (mealOptional.isPresent()) {
+            Meal meal = mealOptional.get();
+            meal.setFavorite(!meal.isFavorite()); // Toggle the favorite status
+            mealRepository.save(meal); // Save the updated meal
+            return ResponseEntity.ok(meal); // Return the updated meal
+        } else {
+            return ResponseEntity.notFound().build(); // Return 404 if meal doesn't exist
+        }
     }
 }

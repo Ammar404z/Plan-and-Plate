@@ -38,6 +38,9 @@ public class Meal {
     @Column
     private int cookedCount = 0;
 
+    @Column(nullable = false)
+    private boolean favorite = false;
+
     // Getters and setters
     public String getCategory() {
         return category;
@@ -117,6 +120,14 @@ public class Meal {
 
     public void setApiId(String apiId) {
         this.apiId = apiId;
+    }
+
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
     }
 
 }
