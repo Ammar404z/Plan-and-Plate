@@ -40,7 +40,7 @@
                2) Share (below, centered) -->
           <div class="button-row">
             <button class="meal-button" @click="saveRecipe(meal)">
-              Save Recipe
+              <font-awesome-icon :icon="['fas', 'save']" /> Save
             </button>
             <button class="meal-button" @click="viewMeal(meal.id)">
               View Meal

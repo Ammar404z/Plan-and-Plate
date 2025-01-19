@@ -1,15 +1,19 @@
 <template>
   <div class="view-meal">
+    <!-- Meal Header Section -->
     <div class="meal-header">
-      <!-- Thumbnail -->
+      <!-- Thumbnail Section -->
       <div class="thumbnail-section">
+        <!-- Meal Thumbnail -->
         <img
           :src="meal.thumbnail"
           alt="Meal Thumbnail"
           class="meal-thumbnail"
         />
+        <!-- Meal Name and Category -->
         <p class="meal-category">{{ meal.name }}</p>
         <p class="meal-category">Category: {{ meal.category }}</p>
+        <!-- Button to watch YouTube video -->
         <button
           v-if="meal.youTubeVid"
           @click="watchYouTubeVid(meal.youTubeVid)"
@@ -19,10 +23,11 @@
         </button>
       </div>
 
-      <!-- Ingredients -->
+      <!-- Ingredients Section -->
       <div class="meal-ingredients">
         <h2>Ingredients</h2>
         <ul>
+          <!-- Loop through ingredients and display each with its thumbnail -->
           <li
             v-for="ingredient in meal.ingredients"
             :key="ingredient.name"
@@ -39,7 +44,7 @@
       </div>
     </div>
 
-    <!-- Instructions -->
+    <!-- Instructions Section -->
     <div class="meal-instructions">
       <h2>Instructions</h2>
       <p>{{ meal.instructions }}</p>
@@ -47,22 +52,27 @@
 
     <!-- Action Buttons -->
     <div class="actions">
+      <!-- Button to save the meal -->
       <button @click="saveRecipe">
         <font-awesome-icon :icon="['fas', 'save']" /> Save
       </button>
+      <!-- Button to toggle share modal -->
       <button @click="toggleShareModal">
         <font-awesome-icon :icon="['fas', 'share-alt']" /> Share
       </button>
+      <!-- Button to go back to the previous page -->
       <button @click="goBack">
         <font-awesome-icon :icon="['fas', 'arrow-left']" /> Back to search
       </button>
     </div>
+
     <!-- Share Modal -->
     <div v-if="isShareModalVisible" class="share-modal">
       <div class="modal-content">
         <h2>Share Recipe</h2>
         <p>Share this recipe with your friends:</p>
         <div class="share-buttons">
+          <!-- Share on Facebook -->
           <a
             :href="`https://www.facebook.com/sharer/sharer.php?u=${shareLink}&quote=${encodeURIComponent(
               'Check out this recipe I found:'
@@ -72,6 +82,7 @@
           >
             <font-awesome-icon :icon="['fab', 'facebook']" />
           </a>
+          <!-- Share on WhatsApp -->
           <a
             :href="`https://wa.me/?text=${encodeURIComponent(
               'Check out this recipe I found: ' + shareLink
@@ -81,6 +92,7 @@
           >
             <font-awesome-icon :icon="['fab', 'whatsapp']" />
           </a>
+          <!-- Share on Twitter -->
           <a
             :href="`https://twitter.com/intent/tweet?url=${shareLink}&text=${encodeURIComponent(
               'Check out this recipe I found:'
@@ -90,10 +102,12 @@
           >
             <font-awesome-icon :icon="['fab', 'twitter']" />
           </a>
+          <!-- Copy Link Button -->
           <button @click="copyLink" class="copy-link-button">
             <font-awesome-icon :icon="['fas', 'copy']" />
           </button>
         </div>
+        <!-- Close modal button -->
         <button @click="toggleShareModal" class="close-modal">Close</button>
       </div>
     </div>
@@ -101,17 +115,23 @@
 </template>
 
 <script setup lang="ts">
-import api from "@/api";
-import { onMounted, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+// Import necessary modules and dependencies
+import api from "@/api"; // API helper for backend requests
+import { onMounted, ref } from "vue"; // Vue composition API for reactivity
+import { useRoute, useRouter } from "vue-router"; // Vue router for navigation
 
+// Get route and router instances
 const route = useRoute();
 const router = useRouter();
+
+// Extract meal ID from route parameters
 const mealId = route.params.id;
 
-const isShareModalVisible = ref(false);
-const shareLink = `${window.location.origin}/view-meal/${mealId}`;
+// Reactive variables
+const isShareModalVisible = ref(false); // State for showing/hiding the share modal
+const shareLink = `${window.location.origin}/view-meal/${mealId}`; // Shareable link for the meal
 
+// Meal data structure
 const meal = ref({
   apiId: "",
   name: "",
@@ -122,12 +142,14 @@ const meal = ref({
   youTubeVid: "",
 });
 
+// Fetch meal details on component mount
 onMounted(async () => {
   try {
     const response = await api.get(
       `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`
     );
     const data = response.data.meals[0];
+    // Map API data to local meal structure
     meal.value = {
       apiId: data.idMeal,
       name: data.strMeal,
@@ -142,12 +164,12 @@ onMounted(async () => {
   }
 });
 
+// Extract ingredients and their thumbnails from the API response
 function extractIngredients(data) {
   const ingredients = [];
   for (let i = 1; i <= 20; i++) {
     const ingredient = data[`strIngredient${i}`];
     const measure = data[`strMeasure${i}`];
-
     if (ingredient && ingredient.trim()) {
       ingredients.push({
         name: ingredient.trim(),
@@ -160,6 +182,7 @@ function extractIngredients(data) {
   return ingredients;
 }
 
+// Save the recipe to the backend
 async function saveRecipe() {
   try {
     // Map the meal data to the recipe payload
@@ -176,6 +199,7 @@ async function saveRecipe() {
     };
 
     // Send the recipe to the backend
+
     const response = await api.post("/api/meals/add", recipe);
     alert(`Recipe "${response.data.name}" saved successfully.`);
   } catch (error) {
@@ -184,10 +208,12 @@ async function saveRecipe() {
   }
 }
 
+// Toggle the share modal visibility
 function toggleShareModal() {
   isShareModalVisible.value = !isShareModalVisible.value;
 }
 
+// Copy the share link to the clipboard
 function copyLink() {
   navigator.clipboard
     .writeText(shareLink)
@@ -195,9 +221,12 @@ function copyLink() {
     .catch(() => alert("Failed to copy the link."));
 }
 
+// Navigate back to the previous page
 function goBack() {
   router.push("/");
 }
+
+// Open the YouTube video in a new tab
 async function watchYouTubeVid(youTubeVid: string) {
   window.open(youTubeVid, "_blank");
 }

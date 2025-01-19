@@ -2,17 +2,23 @@
   <div class="shopping-list-view">
     <h1>Shopping List</h1>
 
-    <!-- Show skipped meals warning if any -->
+    <!-- Display a warning for any skipped meals -->
     <div v-if="skippedMeals.length > 0" class="skipped-meals-warning">
       <p>Some meals were not found and have been skipped:</p>
       <ul>
+        <!-- List the days for which meals were skipped -->
         <li v-for="day in skippedMeals" :key="day">{{ day }}</li>
       </ul>
     </div>
 
+    <!-- Display the shopping list if there are meals available -->
     <div v-if="shoppingList.length > 0">
+      <!-- Loop through the shopping list and display each meal's details -->
       <div v-for="meal in shoppingList" :key="meal.mealName" class="meal-group">
+        <!-- Display the day and meal name -->
         <h3>{{ meal.day }} - {{ meal.mealName }}</h3>
+
+        <!-- Allow the user to adjust portion size -->
         <div class="meal-scaling">
           <label for="scaling">Portion Size:</label>
           <input
@@ -23,23 +29,28 @@
             min="1"
           />
         </div>
+
+        <!-- Display the list of ingredients for the meal -->
         <ul>
           <li
             v-for="ingredient in meal.ingredients"
             :key="ingredient.name"
             class="ingredient-item"
           >
+            <!-- Checkbox for marking ingredients as bought -->
             <input
               type="checkbox"
               v-model="ingredient.isChecked"
               class="ingredient-checkbox"
             />
+            <!-- Display the ingredient thumbnail with a fallback for errors -->
             <img
               :src="getIngredientThumbnail(ingredient.name)"
               :alt="ingredient.name"
               class="ingredient-thumbnail"
               @error="setDefaultThumbnail($event)"
             />
+            <!-- Display the ingredient name and scaled quantity -->
             <span :class="{ checked: ingredient.isChecked }">
               {{ ingredient.name }}: {{ ingredient.scaledQuantity }}
             </span>
@@ -47,14 +58,17 @@
         </ul>
       </div>
     </div>
+    <!-- Message for when the shopping list is loading or empty -->
     <p v-else>Loading shopping list or no meals available...</p>
   </div>
 </template>
+
 <script setup lang="ts">
 import api from "@/api";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
+// Define interfaces for ingredient and meal data
 interface Ingredient {
   name: string;
   quantity: string;
@@ -65,80 +79,81 @@ interface Ingredient {
 interface Meal {
   day: string;
   mealName: string;
-  scalingFactor: number;
-  ingredients: Ingredient[];
+  scalingFactor: number; // Portion size for the meal
+  ingredients: Ingredient[]; // List of ingredients for the meal
 }
 
-const shoppingList = ref<Meal[]>([]);
-const skippedMeals = ref<string[]>([]);
-const route = useRoute();
+// Reactive variables for storing data
+const shoppingList = ref<Meal[]>([]); // Array of meals in the shopping list
+const skippedMeals = ref<string[]>([]); // Days with skipped meals
+const route = useRoute(); // Get route information
 
-// Fetch the shopping list grouped by meals
+// Fetch the shopping list data from the backend
 async function fetchShoppingList() {
   try {
-    const planId = route.params.planId;
+    const planId = route.params.planId; // Get the plan ID from the route
     if (!planId) {
       console.error("Plan ID is undefined. Cannot fetch shopping list.");
       return;
     }
 
+    // Request the shopping list for the given plan ID
     const response = await api.get(`/api/shopping-list/${planId}`);
     console.log("Backend Response:", response.data);
 
-    // Extract any skipped meals if present in the first entry
+    // Extract skipped meals from the first entry in the response, if any
     if (response.data[0]?.skippedMeals) {
       skippedMeals.value = response.data[0].skippedMeals;
     }
 
-    // Map the backend data as before
+    // Map the backend data to the shoppingList format
     shoppingList.value = response.data.map((meal: any) => ({
       ...meal,
       ingredients: Object.entries(meal.ingredients).map(([name, quantity]) => ({
         name,
         quantity,
-        scaledQuantity: quantity,
-        isChecked: false, // Default to unchecked
+        scaledQuantity: quantity, // Initially set to the original quantity
+        isChecked: false, // Default state for the checkbox
       })),
     }));
   } catch (error) {
-    console.error("Failed to fetch shopping list:", error);
+    console.error("Failed to fetch shopping list:", error); // Log errors
   }
 }
 
-// Update ingredient quantities when the scaling factor changes
+// Update the quantities of ingredients based on the scaling factor
 function updateMealScaling(meal: any) {
-  // Check if the quantity contains "original measurement"
   meal.ingredients.forEach((ingredient: any) => {
+    // Handle ingredients with "original measurement" text
     if (ingredient.quantity.includes("original measurement")) {
-      // Update the scaled quantity to reflect the scaling factor
       ingredient.scaledQuantity = `${meal.scalingFactor}x original measurement`;
     } else {
-      // Try to parse the numeric + unit parts
+      // Split the quantity into numeric and unit parts for scaling
       const [amount, unit] = ingredient.quantity.split(" ");
       if (!isNaN(parseFloat(amount))) {
-        // Scale the numeric value and append the unit
         ingredient.scaledQuantity = `${(
           parseFloat(amount) * meal.scalingFactor
         ).toFixed(2)} ${unit || ""}`.trim();
       } else {
-        // If no numeric part, keep it unchanged
-        ingredient.scaledQuantity = ingredient.quantity;
+        ingredient.scaledQuantity = ingredient.quantity; // Keep unchanged if not numeric
       }
     }
   });
 }
-// Generate thumbnail URL for ingredients
+
+// Generate the thumbnail URL for an ingredient
 function getIngredientThumbnail(ingredientName: string): string {
-  const formattedName = ingredientName.split(" (")[0].trim(); // Format name for API
+  const formattedName = ingredientName.split(" (")[0].trim(); // Remove extra details
   return `https://www.themealdb.com/images/ingredients/${formattedName}.png`;
 }
 
+// Set a default thumbnail for ingredients without a valid image
 function setDefaultThumbnail(event: Event): void {
   const target = event.target as HTMLImageElement;
-  target.src = require("@/assets/grocery.png"); // use default thumbnail for ingredients for custom meals(when no thumbnail from the api can be found)
+  target.src = require("@/assets/grocery.png"); // Fallback image
 }
 
-// Fetch shopping list on mount
+// Fetch the shopping list when the component is mounted
 onMounted(() => {
   fetchShoppingList();
 });

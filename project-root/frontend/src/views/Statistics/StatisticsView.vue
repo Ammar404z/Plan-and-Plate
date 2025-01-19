@@ -1,12 +1,14 @@
 <template>
   <div class="statistics-view">
+    <!-- Page Title -->
     <h1>Statistics</h1>
 
-    <!-- Category Statistics -->
+    <!-- Section for displaying saved meals by category -->
     <h2>Saved Meals by Category</h2>
     <canvas id="categoryChart"></canvas>
+    <!-- Chart to visualize the category distribution -->
 
-    <!-- Total Saved Count -->
+    <!-- Section for displaying the total saved recipes count -->
     <div>
       <h2>Total Recipes Saved</h2>
       <p><strong>Total Saves:</strong> {{ totalSavedCount }}</p>
@@ -15,35 +17,37 @@
 </template>
 
 <script setup lang="ts">
-import api from "@/api"; // Your Axios instance
-import Chart from "chart.js/auto";
+import api from "@/api";
+import Chart from "chart.js/auto"; // Chart.js library for rendering charts
 import { onMounted, ref } from "vue";
 
-const categoryDistribution = ref({});
+// Reactive state variables
+const categoryDistribution = ref({}); // Stores the distribution of saved meals by category
 const chartInstance = ref(null);
 const totalSavedCount = ref(0);
-
+// Lifecycle hook that runs when the component is mounted
 onMounted(async () => {
   try {
-    // Fetch the category distribution
+    // Fetch the category distribution data from the backend
     const distributionResponse = await api.get(
       "/api/statistics/category-distribution"
     );
-    categoryDistribution.value = distributionResponse.data;
+    categoryDistribution.value = distributionResponse.data; // Assign the fetched data to the reactive variable
 
-    // Create Pie Chart
-    const ctx = document.getElementById("categoryChart").getContext("2d");
-    const categories = Object.keys(categoryDistribution.value);
-    const counts = Object.values(categoryDistribution.value);
+    // Initialize the Pie Chart for visualizing category distribution
+    const ctx = document.getElementById("categoryChart").getContext("2d"); // Get the canvas context
+    const categories = Object.keys(categoryDistribution.value); // Extract category names
+    const counts = Object.values(categoryDistribution.value); // Extract corresponding counts
 
+    // Create a new Chart.js instance
     chartInstance.value = new Chart(ctx, {
-      type: "pie",
+      type: "pie", // Pie chart type
       data: {
-        labels: categories,
+        labels: categories, // Chart labels
         datasets: [
           {
             label: "Saved Meals by Category",
-            data: counts,
+            data: counts, // Data points for the chart
             backgroundColor: [
               "#FF6384",
               "#36A2EB",
@@ -51,26 +55,26 @@ onMounted(async () => {
               "#4BC0C0",
               "#9966FF",
               "#FF9F40",
-            ],
+            ], // Colors for the pie segments
           },
         ],
       },
       options: {
-        responsive: true,
+        responsive: true, // Makes the chart responsive to screen size
       },
     });
 
-    // Fetch total saved count
+    // Fetch the total saved recipes count from the backend
     const totalSavedResponse = await api.get(
       "/api/statistics/total-saved-count"
     );
-    totalSavedCount.value = totalSavedResponse.data;
+    totalSavedCount.value = totalSavedResponse.data; // Assign the fetched count to the reactive variable
   } catch (error) {
+    // Log any errors that occur during data fetching
     console.error("Error fetching statistics:", error);
   }
 });
 </script>
-
 <style scoped>
 .statistics-view {
   max-width: 700px;

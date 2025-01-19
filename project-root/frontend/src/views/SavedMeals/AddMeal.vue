@@ -1,24 +1,29 @@
 <template>
   <div class="add-meal">
     <h1>Add Custom Meal</h1>
+    <!-- Form to add a custom meal -->
     <form @submit.prevent="addMeal">
       <div>
         <label for="name">Meal Name:</label>
+        <!-- Input for meal name -->
         <input id="name" v-model="meal.name" required />
       </div>
 
       <div>
         <label>Ingredients:</label>
+        <!-- Loop through ingredients to dynamically render input rows -->
         <div
           v-for="(ingredient, index) in ingredients"
           :key="index"
           class="ingredient-row"
         >
+          <!-- Input for ingredient name -->
           <input
             v-model="ingredient.name"
             placeholder="Ingredient (e.g., Rice)"
             required
           />
+          <!-- Input for ingredient quantity -->
           <input
             v-model="ingredient.quantity"
             type="number"
@@ -27,18 +32,22 @@
             placeholder="Quantity (e.g., 1)"
             required
           />
+          <!-- Input for ingredient unit -->
           <input
             v-model="ingredient.unit"
             placeholder="Unit (e.g., cup)"
             required
           />
+          <!-- Button to remove the ingredient row -->
           <button type="button" @click="removeIngredient(index)">Remove</button>
         </div>
+        <!-- Button to add a new ingredient row -->
         <button type="button" @click="addIngredient">Add Ingredient</button>
       </div>
 
       <div>
         <label for="instructions">Instructions:</label>
+        <!-- Textarea for meal instructions -->
         <textarea
           id="instructions"
           v-model="meal.instructions"
@@ -47,20 +56,24 @@
       </div>
       <div>
         <label for="thumbnail">Thumbnail URL (Optional):</label>
+        <!-- Input for meal thumbnail URL -->
         <input id="thumbnail" v-model="meal.thumbnail" />
       </div>
+      <!-- Submit button to save the meal -->
       <button type="submit">Add Meal</button>
+      <!-- Cancel button to navigate back to saved meals -->
       <button @click="router.push(`/saved-meals`)" type="submit">Cancel</button>
     </form>
   </div>
 </template>
 
 <script setup lang="ts">
-import api from "@/api";
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import api from "@/api"; // API module for backend requests
+import { ref } from "vue"; // Vue's reactive state management
+import { useRouter } from "vue-router"; // Vue Router for navigation
 
-const router = useRouter();
+const router = useRouter(); // Router instance for navigation
+// Reactive state for meal details
 const meal = ref({
   name: "",
   ingredients: "",
@@ -83,7 +96,7 @@ function removeIngredient(index: number) {
   ingredients.value.splice(index, 1);
 }
 
-// Combine the ingredients into the desired format
+// Combine the ingredients into the desired format for backend submission
 function combineIngredients(): string {
   return ingredients.value
     .map(
@@ -93,6 +106,7 @@ function combineIngredients(): string {
     .join(", ");
 }
 
+// Validate the thumbnail URL to ensure it's a valid HTTPS link
 function validateThumbnailUrl(url: string): boolean {
   return url.startsWith("https://");
 }
@@ -113,6 +127,7 @@ async function addMeal() {
       alert("Invalid thumbnail URL. Please enter a valid URL.");
       return;
     }
+
     // Save the meal to the backend
     await api.post("/api/meals/add-custom", meal.value);
     alert("Meal added successfully!");
@@ -184,6 +199,7 @@ textarea:focus {
   flex: 1;
 }
 
+/* Remove button styling for ingredient rows */
 button[type="button"] {
   background-color: #dc3545;
   color: white;
@@ -232,10 +248,11 @@ button[type="submit"]:hover {
   background-color: #0056b3;
 }
 
+/* Add spacing between rows */
 .ingredient-row {
   display: flex;
   gap: 10px;
   align-items: center;
-  margin-bottom: 10px; /* Add spacing between rows */
+  margin-bottom: 10px;
 }
 </style>
