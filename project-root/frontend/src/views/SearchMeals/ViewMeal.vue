@@ -215,10 +215,38 @@ function toggleShareModal() {
 
 // Copy the share link to the clipboard
 function copyLink() {
-  navigator.clipboard
-    .writeText(shareLink)
-    .then(() => alert("Link copied to clipboard!"))
-    .catch(() => alert("Failed to copy the link."));
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    // Modern Clipboard API
+    navigator.clipboard
+      .writeText(shareLink)
+      .then(() => alert("Link copied to clipboard!"))
+      .catch(() => alert("Failed to copy the link. Please try manually."));
+  } else {
+    // Fallback for unsupported browsers
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = shareLink;
+      document.body.appendChild(textArea);
+      textArea.select();
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+
+      if (successful) {
+        alert("Link copied to clipboard!");
+      } else {
+        alert(
+          "Failed to copy the link. Please manually copy the link below:\n\n" +
+            shareLink
+        );
+      }
+    } catch (error) {
+      // Final fallback message
+      alert(
+        "Your browser does not support copying to the clipboard. Please manually copy the link below:\n\n" +
+          shareLink
+      );
+    }
+  }
 }
 
 // Navigate back to the previous page
