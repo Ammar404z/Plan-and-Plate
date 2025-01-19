@@ -11,9 +11,9 @@
       <select ref="dropdownRef" v-model="selectedFilter" @change="applyFilters">
         <option value="">All Filters</option>
         <option
-            v-for="filter in combinedFilters"
-            :key="filter.type + filter.value"
-            :value="filter.value"
+          v-for="filter in combinedFilters"
+          :key="filter.type + filter.value"
+          :value="filter.value"
         >
           {{ filter.type }}: {{ filter.value }}
         </option>
@@ -22,10 +22,10 @@
 
     <!-- Search bar -->
     <input
-        v-model="query"
-        placeholder="Search for a recipe"
-        @input="searchMeals"
-        class="search-input"
+      v-model="query"
+      placeholder="Search for a recipe"
+      @input="searchMeals"
+      class="search-input"
     />
 
     <!-- Results -->
@@ -39,11 +39,12 @@
                1) Save Recipe - View Meal
                2) Share (below, centered) -->
           <div class="button-row">
-            <button class="meal-button" @click="saveRecipe(meal)">Save Recipe</button>
-            <button class="meal-button" @click="viewMeal(meal.id)">View Meal</button>
-          </div>
-          <div class="share-row">
-            <button class="meal-share-button" @click="shareMeal(meal.id)">Share</button>
+            <button class="meal-button" @click="saveRecipe(meal)">
+              Save Recipe
+            </button>
+            <button class="meal-button" @click="viewMeal(meal.id)">
+              View Meal
+            </button>
           </div>
         </div>
       </div>
@@ -148,7 +149,7 @@ async function applyFilters() {
 
     // Determine if the selected filter is a category or area
     const selected = combinedFilters.value.find(
-        (filter) => filter.value === selectedFilter.value
+      (filter) => filter.value === selectedFilter.value
     );
     if (selected) {
       if (selected.type === "Category") {
@@ -200,13 +201,13 @@ function extractIngredients(meal: any): string {
     const measure = meal[`strMeasure${i}`];
     if (ingredient && ingredient.trim() !== "") {
       ingredients.push(
-          `${ingredient.trim()} - ${measure?.trim() || "as needed"}`
+        `${ingredient.trim()} - ${measure?.trim() || "as needed"}`
       );
     }
   }
   return ingredients.length > 0
-      ? ingredients.join(", ")
-      : "No ingredients available.";
+    ? ingredients.join(", ")
+    : "No ingredients available.";
 }
 
 async function saveRecipe(meal: Meal) {
@@ -215,7 +216,7 @@ async function saveRecipe(meal: Meal) {
     // the filtered meals for example don't contain the full meal details)
 
     const response = await api.get(
-        `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.id}`
+      `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.id}`
     );
     const fullMeal = response.data.meals[0];
 
@@ -242,7 +243,7 @@ async function saveRecipe(meal: Meal) {
 async function fetchRandomMeal() {
   try {
     const response = await api.get(
-        "https://www.themealdb.com/api/json/v1/1/random.php"
+      "https://www.themealdb.com/api/json/v1/1/random.php"
     );
     const randomMeal = response.data.meals[0];
 
@@ -266,13 +267,6 @@ async function fetchRandomMeal() {
 
 async function viewMeal(mealId: string) {
   router.push(`/view-meal/${mealId}`);
-}
-
-async function shareMeal(mealId: string) {
-  const shareLink = `${window.location.origin}/view-meal/${mealId}`;
-  navigator.clipboard.writeText(shareLink).then(() => {
-    alert("Link copied to clipboard!");
-  });
 }
 </script>
 
@@ -418,7 +412,6 @@ h1 {
   justify-content: center; /* Center align the Share button */
   margin-top: 10px; /* Add space above the Share button */
 }
-
 
 /* Match the color scheme of the Random Meal button for Save/View/Share */
 .meal-button,

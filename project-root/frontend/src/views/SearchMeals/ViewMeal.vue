@@ -47,9 +47,55 @@
 
     <!-- Action Buttons -->
     <div class="actions">
-      <button @click="saveRecipe">Save Recipe</button>
-      <button @click="shareMeal">Share Recipe</button>
-      <button @click="goBack">Back to Search</button>
+      <button @click="saveRecipe">
+        <font-awesome-icon :icon="['fas', 'save']" /> Save
+      </button>
+      <button @click="toggleShareModal">
+        <font-awesome-icon :icon="['fas', 'share-alt']" /> Share
+      </button>
+      <button @click="goBack">
+        <font-awesome-icon :icon="['fas', 'arrow-left']" /> Back to search
+      </button>
+    </div>
+    <!-- Share Modal -->
+    <div v-if="isShareModalVisible" class="share-modal">
+      <div class="modal-content">
+        <h2>Share Recipe</h2>
+        <p>Share this recipe with your friends:</p>
+        <div class="share-buttons">
+          <a
+            :href="`https://www.facebook.com/sharer/sharer.php?u=${shareLink}&quote=${encodeURIComponent(
+              'Check out this recipe I found:'
+            )}`"
+            target="_blank"
+            class="share-icon"
+          >
+            <font-awesome-icon :icon="['fab', 'facebook']" />
+          </a>
+          <a
+            :href="`https://wa.me/?text=${encodeURIComponent(
+              'Check out this recipe I found: ' + shareLink
+            )}`"
+            target="_blank"
+            class="share-icon"
+          >
+            <font-awesome-icon :icon="['fab', 'whatsapp']" />
+          </a>
+          <a
+            :href="`https://twitter.com/intent/tweet?url=${shareLink}&text=${encodeURIComponent(
+              'Check out this recipe I found:'
+            )}`"
+            target="_blank"
+            class="share-icon"
+          >
+            <font-awesome-icon :icon="['fab', 'twitter']" />
+          </a>
+          <button @click="copyLink" class="copy-link-button">
+            <font-awesome-icon :icon="['fas', 'copy']" />
+          </button>
+        </div>
+        <button @click="toggleShareModal" class="close-modal">Close</button>
+      </div>
     </div>
   </div>
 </template>
@@ -62,6 +108,9 @@ import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
 const router = useRouter();
 const mealId = route.params.id;
+
+const isShareModalVisible = ref(false);
+const shareLink = `${window.location.origin}/view-meal/${mealId}`;
 
 const meal = ref({
   apiId: "",
@@ -135,11 +184,15 @@ async function saveRecipe() {
   }
 }
 
-function shareMeal() {
-  const shareLink = `${window.location.origin}/view-meal/${mealId}`;
-  navigator.clipboard.writeText(shareLink).then(() => {
-    alert("Link copied to clipboard!");
-  });
+function toggleShareModal() {
+  isShareModalVisible.value = !isShareModalVisible.value;
+}
+
+function copyLink() {
+  navigator.clipboard
+    .writeText(shareLink)
+    .then(() => alert("Link copied to clipboard!"))
+    .catch(() => alert("Failed to copy the link."));
 }
 
 function goBack() {
@@ -307,5 +360,69 @@ async function watchYouTubeVid(youTubeVid: string) {
 
 .actions button:nth-child(3):hover {
   background-color: #e0a800;
+}
+.share-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6); /* Transparent overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.share-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.share-icon {
+  font-size: 24px;
+  color: #555;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.share-icon:hover {
+  color: #007bff;
+}
+
+.copy-link-button {
+  background: none; /* Make the button transparent */
+  border: none;
+  font-size: 24px;
+  color: #555; /* Neutral color for the icon */
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.copy-link-button:hover {
+  color: #007bff; /* Change to a hover color */
+}
+
+.close-modal {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.close-modal:hover {
+  background: #c82333;
 }
 </style>
