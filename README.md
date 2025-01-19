@@ -165,7 +165,7 @@ Ensure the MariaDB database is running locally. Update the database credentials 
 
 ### Accessing the Application
 
-- Open your browser and navigate to [http://localhost:8080](http://localhost:8080) to access the application locally.
+- Open your browser and navigate to [http://localhost:8081](http://localhost:8081) to access the application locally.
 
 ---
 
