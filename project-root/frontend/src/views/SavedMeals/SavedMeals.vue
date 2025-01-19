@@ -21,6 +21,11 @@
         class="search-bar"
       />
     </div>
+    <div class="filter-container">
+      <button @click="toggleFavoritesFilter" class="filter-button">
+        {{ showFavoritesOnly ? "Show All" : "Show Favorites" }}
+      </button>
+    </div>
 
     <!-- Sort Toggle Button -->
     <div class="sort-container">
@@ -93,6 +98,7 @@ interface Meal {
 const meals = ref<Meal[]>([]);
 const searchQuery = ref(""); // Search query
 const sortOrder = ref("asc"); // Default sorting order
+const showFavoritesOnly = ref(false); // Filter state
 const router = useRouter();
 
 function navigateToAddMeal() {
@@ -147,11 +153,20 @@ function toggleSortOrder() {
 // Computed property to filter and sort meals
 const sortedMeals = computed(() => {
   let filtered = meals.value;
+
+  // Apply search filter
   if (searchQuery.value.trim()) {
     filtered = filtered.filter((meal) =>
       meal.name.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
   }
+
+  // Apply favorite filter
+  if (showFavoritesOnly.value) {
+    filtered = filtered.filter((meal) => meal.favorite);
+  }
+
+  // Apply sorting
   return filtered.sort((a, b) => {
     if (sortOrder.value === "asc") {
       return a.name.localeCompare(b.name);
@@ -161,6 +176,9 @@ const sortedMeals = computed(() => {
   });
 });
 
+function toggleFavoritesFilter() {
+  showFavoritesOnly.value = !showFavoritesOnly.value;
+}
 onMounted(fetchMeals);
 </script>
 
@@ -243,6 +261,29 @@ onMounted(fetchMeals);
 .search-bar:focus {
   border-color: #007bff;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+.filter-container {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.filter-button {
+  padding: 5px 10px;
+  font-size: 1rem;
+  border: 1px solid #28a745;
+  border-radius: 5px;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.filter-button:hover {
+  background-color: #218838;
+}
+
+.filter-button.active {
+  background-color: #155724; /* Darker green for active state */
 }
 
 /* Sort Button */
