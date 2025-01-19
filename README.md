@@ -1,5 +1,3 @@
-Here is the updated README.md file content with the additional features and how to run the project locally:
-
 # Recipe Search App
 
 http://193.196.52.222:8081/
@@ -16,7 +14,7 @@ This is a full-stack recipe search application that enables users to search for,
 
   - Enter a recipe name in the search bar (e.g., "pizza" or "pasta").
   - The application retrieves and displays matching recipes using **TheMealDB API**.
-  - Use filters above the search bar to refine search results.
+  - Use filters above the search bar access recipe categories/areas faster.
 
 - **Save Recipes**:
   - Users can save recipes to their personal list for later use.
@@ -71,8 +69,9 @@ This is a full-stack recipe search application that enables users to search for,
     - Ingredients
     - Instructions
     - Category
+    - Name
     - YouTube tutorial video
-    - Buttons to save, favorite, and share the meal
+    - Buttons to save and share the meal
 
 - **Thumbnails for Ingredients**:
 
@@ -99,8 +98,10 @@ This is a full-stack recipe search application that enables users to search for,
 ## Technology Stack
 
 - **Frontend**:
+
   - **Vue.js**: Used for building the user interface.
   - **Axios**: For making API calls to the backend.
+
 - **Backend**:
 
   - **Spring Boot**: Provides REST APIs and handles business logic.
@@ -160,7 +161,7 @@ This is a full-stack recipe search application that enables users to search for,
 
 ### Database Configuration
 
-Ensure the MariaDB database is running locally. Update the database credentials in the `application.properties` file located in the `backend/src/main/resources` directory.
+Ensure the MariaDB database is running locally. Update the database credentials in the `application.properties` file located in the `backend/src/main/resources` directory(you can also use the default credentials like in this project. Username:root, Password:root. If you do so, then there is no need to edit the application.properties file).
 
 ### Accessing the Application
 
