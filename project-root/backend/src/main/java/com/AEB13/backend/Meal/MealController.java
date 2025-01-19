@@ -20,23 +20,53 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Controller class that handles HTTP requests for Meal-related endpoints.
+ */
 @RestController
 public class MealController {
+
+    /**
+     * Base URL for TheMealDB API, injected from application properties.
+     */
     @Value("${themealdb.api.url}")
     private String themealdbApiUrl;
+
+    /**
+     * A RestTemplate instance for making external API calls.
+     */
     private final RestTemplate restTemplate = new RestTemplate();
 
+    /**
+     * Repository for CRUD operations on Meal entities.
+     */
     @Autowired
     private MealRepository mealRepository;
 
+    /**
+     * Service layer for handling Meal business logic.
+     */
     @Autowired
     private MealService mealService;
 
+    /**
+     * Searches for meals by name using TheMealDB API.
+     *
+     * @param name the name (or partial name) of the meal to search
+     * @return a map containing JSON response from TheMealDB API
+     */
     @GetMapping("/api/meals/search")
     public Map<String, Object> searchMealByName(@RequestParam String name) {
         return mealService.searchMealByName(name);
     }
 
+    /**
+     * Adds a meal to the database. If the meal already exists, increments its
+     * saved count. Otherwise, creates a new record.
+     *
+     * @param meal the Meal object to be added or updated
+     * @return the saved Meal entity
+     */
     @PostMapping("/api/meals/add")
     public ResponseEntity<Meal> addMeal(@RequestBody Meal meal) {
         System.out.println("Received Meal: " + meal.getName()); // Debug log
@@ -45,22 +75,33 @@ public class MealController {
         return ResponseEntity.ok(savedMeal);
     }
 
-    @PostMapping("/api/meals/add-custom") // add custom meal endpoint here. This endpoint should accept a custom meal
-                                          // object and save it to the database.
+    /**
+     * Adds a custom meal to the database.
+     * <p>This endpoint accepts a Meal object with custom details and saves it
+     * if it does not already exist.</p>
+     *
+     * @param meal the custom Meal object to be added
+     * @return the saved custom Meal entity
+     */
+    @PostMapping("/api/meals/add-custom")
     public ResponseEntity<Meal> addCustomMeal(@RequestBody Meal meal) {
         Meal savedMeal = mealService.addCustomMeal(meal);
         return ResponseEntity.ok(savedMeal);
     }
 
-    /*
-     * TODO: add the logic in the service layer
+    /**
+     * Filters meals based on a specific category or area.
+     * <p>Only one filter can be applied at a time.</p>
+     *
+     * @param category the category to filter by (optional)
+     * @param area the area to filter by (optional)
+     * @return the filtered list of meals or an error message
      */
     @GetMapping("api/meals/filter")
     public ResponseEntity<?> filterMeals(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String area) {
 
-        // Ensure only one filter is applied at a time
         if ((category == null || category.isEmpty()) && (area == null || area.isEmpty())) {
             return ResponseEntity.badRequest().body("At least one filter (category or area) must be specified.");
         }
@@ -73,8 +114,6 @@ public class MealController {
             filterEndpoint = themealdbApiUrl + "/filter.php?a=" + area;
         }
 
-        // Fetch filtered meals from TheMealDB API
-        RestTemplate restTemplate = new RestTemplate();
         try {
             ResponseEntity<String> response = restTemplate.getForEntity(filterEndpoint, String.class);
             return ResponseEntity.ok(response.getBody());
@@ -83,27 +122,26 @@ public class MealController {
         }
     }
 
-    /*
-     * TODO: add the logic in the service layer
+    /**
+     * Retrieves a combined list of categories and areas from TheMealDB API.
+     *
+     * @return a list containing both meal categories and areas
      */
     @GetMapping("/api/meals/categoriesAndAreas")
     public ResponseEntity<?> getCategoriesAndAreas() {
-        String categoriesUrl = themealdbApiUrl + "/list.php?c=list"; // Categories endpoint
-        String areasUrl = themealdbApiUrl + "/list.php?a=list"; // Areas endpoint
+        String categoriesUrl = themealdbApiUrl + "/list.php?c=list";
+        String areasUrl = themealdbApiUrl + "/list.php?a=list";
 
         try {
-            // Fetch categories and areas from TheMealDB API
             ResponseEntity<String> categoriesResponse = restTemplate.getForEntity(categoriesUrl, String.class);
             ResponseEntity<String> areasResponse = restTemplate.getForEntity(areasUrl, String.class);
 
-            // Parse responses into JSON format
             ObjectMapper objectMapper = new ObjectMapper();
             List<Map<String, String>> categories = (List<Map<String, String>>) objectMapper
                     .readValue(categoriesResponse.getBody(), Map.class).get("meals");
             List<Map<String, String>> areas = (List<Map<String, String>>) objectMapper
                     .readValue(areasResponse.getBody(), Map.class).get("meals");
 
-            // Combine categories and areas into a single list with type and value
             List<Map<String, String>> combinedFilters = new ArrayList<>();
             for (Map<String, String> category : categories) {
                 combinedFilters.add(Map.of("type", "Category", "value", category.get("strCategory")));
@@ -112,7 +150,6 @@ public class MealController {
                 combinedFilters.add(Map.of("type", "Area", "value", area.get("strArea")));
             }
 
-            // Return the combined list as a single key "filters"
             Map<String, Object> response = Map.of("filters", combinedFilters);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -121,17 +158,33 @@ public class MealController {
         }
     }
 
+    /**
+     * Retrieves all meals from the local database.
+     *
+     * @return a list of all Meal entities
+     */
     @GetMapping("/api/meals")
     public List<Meal> getAllMeals() {
         return mealService.getAllMeals();
     }
 
+    /**
+     * Deletes a specific meal by its ID.
+     *
+     * @param id the ID of the meal to be deleted
+     * @return a no-content response on success
+     */
     @DeleteMapping("/api/meals/{id}")
     public ResponseEntity<Void> deleteMeal(@PathVariable Long id) {
         mealService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Retrieves the top 5 meals based on saved count, in descending order.
+     *
+     * @return a list of the top 5 most saved meals
+     */
     @GetMapping("/api/statistics/top-saved-recipes")
     public List<Meal> getTopSavedMeals() {
         List<Meal> meals = mealRepository.findTop5ByOrderBySavedCountDesc();
@@ -139,16 +192,22 @@ public class MealController {
         return meals;
     }
 
+    /**
+     * Toggles the favorite status of a specific meal by its ID.
+     *
+     * @param id the ID of the meal whose favorite status to toggle
+     * @return the updated Meal object, or 404 if not found
+     */
     @PutMapping("/api/meals/{id}")
     public ResponseEntity<Meal> toggleFavorite(@PathVariable Long id) {
         Optional<Meal> mealOptional = mealRepository.findById(id);
         if (mealOptional.isPresent()) {
             Meal meal = mealOptional.get();
-            meal.setFavorite(!meal.isFavorite()); // Toggle the favorite status
-            mealRepository.save(meal); // Save the updated meal
-            return ResponseEntity.ok(meal); // Return the updated meal
+            meal.setFavorite(!meal.isFavorite());
+            mealRepository.save(meal);
+            return ResponseEntity.ok(meal);
         } else {
-            return ResponseEntity.notFound().build(); // Return 404 if meal doesn't exist
+            return ResponseEntity.notFound().build();
         }
     }
 }

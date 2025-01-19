@@ -18,25 +18,34 @@ import org.springframework.stereotype.Service;
 import com.AEB13.backend.Meal.Meal;
 import com.AEB13.backend.Meal.MealRepository;
 
+/**
+ * Service class containing business logic for managing and generating data related to {@link WeeklyPlan}.
+ */
 @Service
 public class WeeklyPlanService {
 
+    /**
+     * Repository to perform database operations on {@link WeeklyPlan} entities.
+     */
     @Autowired
     private WeeklyPlanRepository weeklyPlanRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(WeeklyPlanService.class);
 
+    /**
+     * Repository to perform database operations on {@link Meal} entities.
+     */
     @Autowired
     private MealRepository mealRepository;
 
     /**
-     * Generates a shopping list grouped by meals, allowing individual scaling for
-     * each meal.
+     * Generates a shopping list grouped by meals within a specified weekly plan.
+     * <p>The default multiplier scales ingredient quantities for each meal.</p>
      *
-     * @param weeklyPlanId      The ID of the weekly plan.
-     * @param defaultMultiplier The default scaling factor for meals.
-     * @return A list of maps, each containing a meal's ingredients, day, and
-     *         scaling factor.
+     * @param weeklyPlanId      the ID of the weekly plan
+     * @param defaultMultiplier the default scaling factor for each meal
+     * @return a list of maps representing the shopping list for each day
+     * @throws IllegalStateException if no valid meals are found in the plan
      */
     public List<Map<String, Object>> generateShoppingList(Long weeklyPlanId, int defaultMultiplier) {
         WeeklyPlan weeklyPlan = getWeeklyPlan(weeklyPlanId);
@@ -77,7 +86,6 @@ public class WeeklyPlanService {
                 shoppingList.add(mealDetails);
 
             } catch (Exception e) {
-                // Log the error and continue with next meal
                 logger.warn("Failed to process meal for {}: {}", day, e.getMessage());
                 skippedMeals.add(day);
             }
@@ -90,8 +98,15 @@ public class WeeklyPlanService {
         return shoppingList;
     }
 
+    /**
+     * Parses the ingredient string from a Meal and accumulates scaled quantities in a consolidated map.
+     *
+     * @param ingredients            the raw ingredient string from the Meal
+     * @param consolidatedIngredients the map to store scaled ingredient data
+     * @param multiplier             the scaling factor for each ingredient
+     */
     private void parseAndAggregateIngredients(String ingredients, Map<String, Double> consolidatedIngredients,
-            int multiplier) {
+                                              int multiplier) {
         String[] items = ingredients.split(",");
 
         for (String item : items) {
@@ -101,8 +116,6 @@ public class WeeklyPlanService {
                 String quantityString = parts[1].trim();
 
                 try {
-                    // Enhanced regex pattern to handle fractions (including ¼, ½, ¾) and various
-                    // unit formats
                     java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(
                             "^([\\d./¼½¾]+)\\s*([a-zA-Z]+|tsp|tbsp|kg|g|ml|oz|cup|teaspoon|tablespoon)?\\s*(\\(.*\\))?$",
                             java.util.regex.Pattern.CASE_INSENSITIVE);
@@ -118,14 +131,14 @@ public class WeeklyPlanService {
 
                         double quantity = parseFraction(numericPart) * multiplier;
 
-                        // Combine unit with any extra information (like "Medium" for eggs)
+                        // Combine unit with any extra information
                         String fullUnit = unit + (extraInfo.isEmpty() ? "" : " " + extraInfo);
 
-                        // Add to the consolidated map
+                        // Key for the consolidated map: "ingredient (unit info)"
                         String key = ingredient + (fullUnit.isEmpty() ? "" : " (" + fullUnit + ")");
                         consolidatedIngredients.merge(key, quantity, (oldVal, newVal) -> Math.max(0, oldVal + newVal));
                     } else {
-                        // Handle non-numeric quantities (e.g., "Dusting")
+                        // Handle non-numeric quantities
                         String key = ingredient + " (" + quantityString + ")";
                         consolidatedIngredients.putIfAbsent(key, -1.0);
                     }
@@ -138,6 +151,12 @@ public class WeeklyPlanService {
         }
     }
 
+    /**
+     * Converts common fraction characters (¼, ½, ¾) to their numeric equivalents ("1/4", "1/2", "3/4").
+     *
+     * @param input the original string potentially containing special fraction characters
+     * @return the string with special fractions replaced by numeric fractions
+     */
     private String convertSpecialFractions(String input) {
         return input
                 .replace("¼", "1/4")
@@ -145,10 +164,14 @@ public class WeeklyPlanService {
                 .replace("¾", "3/4");
     }
 
+    /**
+     * Normalizes various unit strings to a standard format (e.g., "tablespoon" -> "tbsp").
+     *
+     * @param unit the original unit string
+     * @return a normalized unit string
+     */
     private String normalizeUnit(String unit) {
-        if (unit == null)
-            return "";
-
+        if (unit == null) return "";
         unit = unit.toLowerCase().trim();
         switch (unit) {
             case "tsp":
@@ -179,11 +202,12 @@ public class WeeklyPlanService {
     }
 
     /**
-     * Parses a fraction or a numeric value and converts it to a double.
-     * 
-     * @param input The input string (e.g., "1/2", "0.5").
-     * @return The parsed numeric value.
-     * @throws NumberFormatException if the input is not a valid number or fraction.
+     * Parses a fraction or numeric string into a double.
+     * <p>Handles both fraction (e.g., "1/2") and decimal (e.g., "0.5") formats.</p>
+     *
+     * @param input the string to parse
+     * @return the numeric value
+     * @throws NumberFormatException if the format is invalid
      */
     private double parseFraction(String input) throws NumberFormatException {
         if (input.contains("/")) {
@@ -196,16 +220,15 @@ public class WeeklyPlanService {
                 throw new NumberFormatException("Invalid fraction format");
             }
         }
-        return Double.parseDouble(input); // For standard numeric values
+        return Double.parseDouble(input);
     }
 
     /**
-     * Formats the consolidated ingredients map into a user-friendly shopping list.
-     * 
-     * @param consolidatedIngredients The map with scaled ingredient quantities.
-     * @param multilplier             the number of portions/people
-     * @return A formatted map with ingredients as keys and their quantities as
-     *         values.
+     * Converts a map of scaled ingredients to a formatted map for display or output.
+     *
+     * @param consolidatedIngredients the map containing ingredient keys and numeric values
+     * @param multiplier             the scaling factor used for the plan
+     * @return a map of ingredient keys and their formatted quantities
      */
     private Map<String, String> formatShoppingList(Map<String, Double> consolidatedIngredients, int multiplier) {
         Map<String, String> shoppingList = new HashMap<>();
@@ -218,7 +241,7 @@ public class WeeklyPlanService {
                 // For non-numerical ingredients, retain the original measurement
                 shoppingList.put(ingredient, multiplier + "x original measurement");
             } else {
-                // For numerical ingredients, format as usual
+                // For numerical ingredients, format normally
                 shoppingList.put(ingredient, String.format("%.2f", quantity));
             }
         }
@@ -227,14 +250,13 @@ public class WeeklyPlanService {
     }
 
     /**
-     * Sorts the meal plan by day of the week.
+     * Sorts a map of day-to-meal associations in a natural weekly order (Monday -> Sunday).
      *
-     * @param meals The map with days as keys and meal IDs as values.
-     * @return A sorted map with days as keys and meal IDs as values.
+     * @param meals the unsorted map of days to meal IDs
+     * @return a new map sorted by day of the week
      */
     private Map<String, Long> sortDays(Map<String, Long> meals) {
-        List<String> dayOrder = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
-                "Sunday");
+        List<String> dayOrder = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
         return meals.entrySet()
                 .stream()
                 .sorted(Comparator.comparingInt(entry -> dayOrder.indexOf(entry.getKey())))
@@ -245,6 +267,13 @@ public class WeeklyPlanService {
                         LinkedHashMap::new));
     }
 
+    /**
+     * Retrieves a {@link WeeklyPlan} by its ID, sorting its meals by day.
+     *
+     * @param id the ID of the plan
+     * @return the retrieved plan
+     * @throws RuntimeException if the plan does not exist
+     */
     public WeeklyPlan getWeeklyPlan(Long id) {
         WeeklyPlan weeklyPlan = weeklyPlanRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Plan with ID " + id + " not found"));
@@ -256,6 +285,13 @@ public class WeeklyPlanService {
         return weeklyPlan;
     }
 
+    /**
+     * Creates a new weekly plan for a specified week, if it does not already exist.
+     *
+     * @param weeklyPlan the new weekly plan to create
+     * @return the saved {@link WeeklyPlan} entity
+     * @throws IllegalArgumentException if a plan for the specified week already exists
+     */
     public WeeklyPlan createWeeklyPlan(WeeklyPlan weeklyPlan) {
         Optional<WeeklyPlan> existingPlan = weeklyPlanRepository.findByWeek(weeklyPlan.getWeek());
         if (existingPlan.isPresent()) {
@@ -264,12 +300,25 @@ public class WeeklyPlanService {
         return weeklyPlanRepository.save(weeklyPlan);
     }
 
+    /**
+     * Updates an existing weekly plan's day-to-meal mappings and saves it.
+     *
+     * @param id    the ID of the weekly plan to update
+     * @param meals the new mapping of days to meal IDs
+     * @return the updated {@link WeeklyPlan} entity
+     */
     public WeeklyPlan updateWeeklyPlan(Long id, Map<String, Long> meals) {
         WeeklyPlan plan = getWeeklyPlan(id);
         plan.setMeals(meals);
         return weeklyPlanRepository.save(plan);
     }
 
+    /**
+     * Deletes a weekly plan by its ID.
+     *
+     * @param id the ID of the weekly plan to delete
+     * @throws RuntimeException if the plan does not exist
+     */
     public void deleteWeeklyPlan(Long id) {
         if (!weeklyPlanRepository.existsById(id)) {
             throw new RuntimeException("Plan with ID " + id + " does not exist");
@@ -277,6 +326,11 @@ public class WeeklyPlanService {
         weeklyPlanRepository.deleteById(id);
     }
 
+    /**
+     * Retrieves all weekly plans, sorts each plan's meals by day, and optionally sorts the plans by week.
+     *
+     * @return a list of all sorted {@link WeeklyPlan} entities
+     */
     public List<WeeklyPlan> getAllWeeklyPlans() {
         List<WeeklyPlan> weeklyPlans = weeklyPlanRepository.findAll();
 
@@ -286,10 +340,9 @@ public class WeeklyPlanService {
             plan.setMeals(sortedMeals);
         });
 
-        // Optionally, sort the weekly plans themselves (e.g., by week number)
+        // Sort the list of weekly plans by their week number
         weeklyPlans.sort(Comparator.comparing(WeeklyPlan::getWeek));
 
         return weeklyPlans;
-
     }
 }
