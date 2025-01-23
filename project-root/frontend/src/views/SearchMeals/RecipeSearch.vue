@@ -174,10 +174,12 @@ async function applyFilters() {
 async function searchMeals() {
   if (query.value) {
     try {
-      const response = await api.get("/api/meals/search", {
+      // Fetch meals from API
+      const apiResponse = await api.get("/api/meals/search", {
         params: { name: query.value },
       });
-      meals.value = (response.data.meals || []).map((meal: any) => ({
+
+      const apiMeals = (apiResponse.data.meals || []).map((meal: any) => ({
         id: meal.idMeal,
         name: meal.strMeal,
         thumbnail: meal.strMealThumb,
@@ -186,6 +188,31 @@ async function searchMeals() {
         category: meal.strCategory || "Unknown",
         youTubeVid: meal.strYoutube || "",
       }));
+
+      // Fetch custom meals from the database
+      const dbResponse = await api.get("/api/meals/custom/search", {
+        params: { name: query.value },
+      });
+
+      const dbMeals = (dbResponse.data || []).map((meal: any) => ({
+        id: meal.id,
+        name: meal.name,
+        thumbnail: meal.thumbnail,
+        instructions: meal.instructions || "No instructions available.",
+        ingredients: meal.ingredients,
+        category: meal.category || "Unknown",
+        youTubeVid: meal.youTubeVid || "",
+      }));
+
+      // Merge API and DB meals, avoiding duplicates by ID
+      const uniqueMeals = [...apiMeals, ...dbMeals].reduce((acc, meal) => {
+        if (!acc.some((m) => m.id === meal.id)) {
+          acc.push(meal);
+        }
+        return acc;
+      }, []);
+
+      meals.value = uniqueMeals;
     } catch (error) {
       console.error("Error fetching meals:", error);
     }

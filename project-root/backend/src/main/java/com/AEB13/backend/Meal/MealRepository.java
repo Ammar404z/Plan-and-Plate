@@ -8,7 +8,9 @@ import org.springframework.stereotype.Repository;
 
 /**
  * Repository interface for managing {@link Meal} entities.
- * <p>Provides CRUD operations and custom query methods for meal data.</p>
+ * <p>
+ * Provides CRUD operations and custom query methods for meal data.
+ * </p>
  */
 @Repository
 public interface MealRepository extends CrudRepository<Meal, Long> {
@@ -54,8 +56,16 @@ public interface MealRepository extends CrudRepository<Meal, Long> {
     /**
      * Counts the meals by category where savedCount is greater than 0.
      *
-     * @return a list of objects, where each object contains the category and the count
+     * @return a list of objects, where each object contains the category and the
+     *         count
      */
     @Query("SELECT m.category, COUNT(m) FROM Meal m WHERE m.savedCount > 0 GROUP BY m.category")
     List<Object[]> countMealsByCategory();
+
+    /**
+     * 
+     * @param name the name of the meal
+     * @return List of Melas that fit the search criteria
+     */
+    List<Meal> findByNameContainingIgnoreCase(String name);
 }

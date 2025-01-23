@@ -77,8 +77,10 @@ public class MealController {
 
     /**
      * Adds a custom meal to the database.
-     * <p>This endpoint accepts a Meal object with custom details and saves it
-     * if it does not already exist.</p>
+     * <p>
+     * This endpoint accepts a Meal object with custom details and saves it
+     * if it does not already exist.
+     * </p>
      *
      * @param meal the custom Meal object to be added
      * @return the saved custom Meal entity
@@ -91,10 +93,12 @@ public class MealController {
 
     /**
      * Filters meals based on a specific category or area.
-     * <p>Only one filter can be applied at a time.</p>
+     * <p>
+     * Only one filter can be applied at a time.
+     * </p>
      *
      * @param category the category to filter by (optional)
-     * @param area the area to filter by (optional)
+     * @param area     the area to filter by (optional)
      * @return the filtered list of meals or an error message
      */
     @GetMapping("api/meals/filter")
@@ -209,5 +213,16 @@ public class MealController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    /**
+     * Searches for custom meals by name.
+     *
+     * @param name the name (or partial name) of the custom meal to search
+     * @return a list of custom meals that match the search criteria
+     */
+    @GetMapping("/api/meals/custom/search")
+    public List<Meal> searchCustomMeals(@RequestParam String name) {
+        return mealRepository.findByNameContainingIgnoreCase(name);
     }
 }
