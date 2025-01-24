@@ -51,29 +51,20 @@ public class MealController {
     private MealService mealService;
 
     /**
-     * Searches for meals by name using TheMealDB API.
+     * Adds a meal to the database. If the meal already exists, returns an error
+     * response. Otherwise, creates a new record.
      *
-     * @param name the name (or partial name) of the meal to search
-     * @return a map containing JSON response from TheMealDB API
-     */
-    @GetMapping("/api/meals/search")
-    public Map<String, Object> searchMealByName(@RequestParam String name) {
-        return mealService.searchMealByName(name);
-    }
-
-    /**
-     * Adds a meal to the database. If the meal already exists, increments its
-     * saved count. Otherwise, creates a new record.
-     *
-     * @param meal the Meal object to be added or updated
-     * @return the saved Meal entity
+     * @param meal the Meal object to be added
+     * @return the saved Meal entity or an error response if it already exists
      */
     @PostMapping("/api/meals/add")
-    public ResponseEntity<Meal> addMeal(@RequestBody Meal meal) {
-        System.out.println("Received Meal: " + meal.getName()); // Debug log
-        Meal savedMeal = mealService.addMeal(meal);
-        System.out.println("Saved Meal: " + savedMeal.getName()); // Debug log
-        return ResponseEntity.ok(savedMeal);
+    public ResponseEntity<?> addMeal(@RequestBody Meal meal) {
+        try {
+            Meal savedMeal = mealService.addMeal(meal); // Service layer now handles duplicates
+            return ResponseEntity.ok(savedMeal);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(409).body(e.getMessage());
+        }
     }
 
     /**

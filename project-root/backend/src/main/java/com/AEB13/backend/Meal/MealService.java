@@ -65,14 +65,14 @@ public class MealService {
      * @return the persisted Meal object
      */
     public Meal addMeal(Meal meal) {
+        // Check if a meal with the same name already exists
         Meal existingMeal = mealRepository.findByName(meal.getName());
         if (existingMeal != null) {
-            existingMeal.setSavedCount(existingMeal.getSavedCount() + 1);
-            return mealRepository.save(existingMeal);
-        } else {
-            meal.setSavedCount(1); // Initialize for a new meal
-            return mealRepository.save(meal);
+            throw new RuntimeException("Meal with name '" + meal.getName() + "' already exists.");
         }
+
+        meal.setSavedCount(1); // Initialize saved count for a new meal
+        return mealRepository.save(meal);
     }
 
     /**

@@ -210,9 +210,15 @@ async function saveRecipe(meal: Meal) {
 
     const saveResponse = await api.post("/api/meals/add", recipe);
     alert(`Recipe "${saveResponse.data.name}" saved successfully.`);
-  } catch (error) {
-    console.error("Error saving recipe:", error);
-    alert("Failed to save recipe. Please try again.");
+  } catch (error: any) {
+    if (error.response && error.response.status === 409) {
+      // If the backend returns 409 Conflict for duplicate save
+      alert("Recipe already saved !");
+    } else {
+      // Handle other errors
+      console.error("Error saving recipe:", error);
+      alert("Failed to save recipe. Please try again.");
+    }
   }
 }
 
