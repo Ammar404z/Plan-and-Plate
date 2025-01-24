@@ -10,8 +10,10 @@ import jakarta.persistence.Table;
 /**
  * Represents a Meal entity in the application.
  *
- * <p>This entity stores various attributes of a meal, including its name,
- * ingredients, cooking instructions, associated media, and usage statistics.</p>
+ * <p>
+ * This entity stores various attributes of a meal, including its name,
+ * ingredients, cooking instructions, associated media, and usage statistics.
+ * </p>
  */
 @Entity
 @Table(name = "meals")
@@ -26,7 +28,9 @@ public class Meal {
 
     /**
      * The name of the meal.
-     * <p>Cannot be null.</p>
+     * <p>
+     * Cannot be null.
+     * </p>
      */
     @Column(nullable = false)
     private String name;
@@ -80,6 +84,9 @@ public class Meal {
      */
     @Column(nullable = false)
     private boolean favorite = false;
+
+    @Column(nullable = false)
+    private boolean isCustom = false;
 
     /**
      * Retrieves the category of this meal.
@@ -277,6 +284,14 @@ public class Meal {
      */
     public void setFavorite(boolean favorite) {
         this.favorite = favorite;
+    }
+
+    public boolean isCustom() {
+        return isCustom;
+    }
+
+    public void setCustom(boolean isCustom) {
+        this.isCustom = isCustom;
     }
 
 }

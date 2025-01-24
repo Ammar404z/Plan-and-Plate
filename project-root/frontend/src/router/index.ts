@@ -3,6 +3,7 @@ import ViewMeal from "@/views/SearchMeals/ViewMeal.vue";
 import StatisticsView from "@/views/Statistics/StatisticsView.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import SavedMeals from "../views/SavedMeals/SavedMeals.vue";
+import CustomMealView from "../views/SearchMeals/CustomMealView.vue";
 import RecipeSearch from "../views/SearchMeals/RecipeSearch.vue";
 import CreateWeeklyPlans from "../views/WeeklyPlans/CreateWeeklyPlans.vue";
 import EditWeeklyPlan from "../views/WeeklyPlans/EditWeeklyPlan.vue";
@@ -38,6 +39,11 @@ const routes = [
     path: "/view-meal/:id",
     name: "ViewMeal",
     component: ViewMeal,
+  },
+  {
+    path: "/viewCustom-meal/:id",
+    name: "CustomMealView",
+    component: CustomMealView,
   },
 ];
 

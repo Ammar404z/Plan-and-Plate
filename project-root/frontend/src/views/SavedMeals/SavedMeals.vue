@@ -51,17 +51,9 @@
         <!-- Title below the thumbnail -->
         <h3 class="meal-title">{{ meal.name }}</h3>
 
-        <!-- Details for custom meals -->
-        <div v-if="!meal.apiId" class="meal-details">
-          <p><strong>Ingredients:</strong> {{ meal.ingredients }}</p>
-          <p><strong>Instructions:</strong> {{ meal.instructions }}</p>
-        </div>
-
         <!-- Buttons -->
         <button @click="deleteMeal(meal.id)">Delete Meal</button>
-        <button v-if="meal.apiId" @click="viewMeal(meal.apiId)">
-          View Meal
-        </button>
+        <button @click="viewMeal(meal.id, meal.custom)">View Meal</button>
         <button
           v-if="meal.youTubeVid"
           @click="watchYouTubeVid(meal.youTubeVid)"
@@ -93,6 +85,7 @@ interface Meal {
   category: string;
   youTubeVid: string;
   favorite: boolean;
+  custom: boolean;
 }
 
 const meals = ref<Meal[]>([]);
@@ -131,8 +124,12 @@ async function deleteMeal(id: string) {
   }
 }
 
-async function viewMeal(mealId: string) {
-  router.push(`/view-meal/${mealId}`);
+async function viewMeal(mealId: string, isCustom: boolean) {
+  if (isCustom) {
+    router.push(`/viewCustom-meal/${mealId}`);
+  } else {
+    router.push(`/view-meal/${mealId}`);
+  }
 }
 
 async function toggleFavorite(meal: Meal) {

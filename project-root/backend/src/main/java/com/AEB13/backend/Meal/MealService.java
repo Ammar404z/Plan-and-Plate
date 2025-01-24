@@ -93,6 +93,8 @@ public class MealService {
             meal.setThumbnail(DEAFULT_TUMBNAIL_URL);
         }
 
+        meal.setSavedCount(1);
+        meal.setCustom(true);
         return mealRepository.save(meal);
     }
 

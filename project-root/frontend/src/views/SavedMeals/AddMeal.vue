@@ -101,6 +101,7 @@ const meal = ref({
   instructions: "",
   thumbnail: "",
   category: "",
+  isCustom: true,
 });
 
 // Array to hold individual ingredient components
@@ -153,6 +154,8 @@ async function addMeal() {
       alert("Invalid thumbnail URL. Please enter a valid URL.");
       return;
     }
+
+    meal.value.isCustom = true;
 
     // Save the meal to the backend
     await api.post("/api/meals/add-custom", meal.value);

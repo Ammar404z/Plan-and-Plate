@@ -8,7 +8,11 @@
 
     <!-- Filters with a ref for the dropdown -->
     <div class="filters">
-      <select ref="dropdownRef" v-model="selectedFilter" @change="applyFilters">
+      <select
+        ref="dropdownRef"
+        v-model="selectedFilter"
+        @change="applyFiltersAndSearch"
+      >
         <option value="">All Filters</option>
         <option
           v-for="filter in combinedFilters"
@@ -44,7 +48,10 @@
             <button class="meal-button" @click="saveRecipe(meal)">
               <font-awesome-icon :icon="['fas', 'save']" /> Save
             </button>
-            <button class="meal-button" @click="viewMeal(meal.id)">
+            <button
+              class="meal-button"
+              @click="viewMeal(meal.id, meal.isCustom)"
+            >
               View Meal
             </button>
           </div>
@@ -164,6 +171,7 @@ async function applyFiltersAndSearch() {
       ingredients: meal.ingredients,
       category: meal.category || "Unknown",
       youTubeVid: meal.youTubeVid || "",
+      isCustom: meal.custom ?? false,
     }));
   } catch (error) {
     console.error("Error fetching meals with filters and search:", error);
@@ -247,8 +255,13 @@ async function fetchRandomMeal() {
   }
 }
 
-async function viewMeal(mealId: string) {
-  router.push(`/view-meal/${mealId}`);
+async function viewMeal(mealId: string, isCustom: boolean) {
+  console.log("Meal ID:", mealId, "Is Custom:", isCustom);
+  if (isCustom) {
+    router.push(`/viewCustom-meal/${mealId}`);
+  } else {
+    router.push(`/view-meal/${mealId}`);
+  }
 }
 </script>
 
