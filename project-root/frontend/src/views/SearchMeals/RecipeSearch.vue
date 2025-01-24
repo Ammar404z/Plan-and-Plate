@@ -20,13 +20,15 @@
       </select>
     </div>
 
-    <!-- Search bar -->
-    <input
-      v-model="query"
-      placeholder="Search for a recipe"
-      @input="searchMeals"
-      class="search-input"
-    />
+    <!-- Search Form -->
+    <form @submit.prevent="applyFiltersAndSearch">
+      <input
+        v-model="query"
+        placeholder="Search for a recipe"
+        class="search-input"
+      />
+      <button type="submit" class="search-submit-button">Search</button>
+    </form>
 
     <!-- Results -->
     <!-- Wrapper element with v-if applied -->
@@ -121,103 +123,50 @@ async function fetchFilters() {
   }
 }
 
-// Fetch all saved meals on component mount
-async function fetchAllMeals() {
+async function applyFiltersAndSearch() {
   try {
-    const response = await api.get("/api/meals");
-    meals.value = response.data.map((meal: any) => ({
+    const params = new URLSearchParams();
+
+    // Add filters if selected
+    if (selectedFilter.value) {
+      const selected = combinedFilters.value.find(
+        (filter) => filter.value === selectedFilter.value
+      );
+      if (selected) {
+        if (selected.type === "Category") {
+          params.append("category", selected.value);
+        } else if (selected.type === "Area") {
+          params.append("area", selected.value);
+        }
+      }
+    }
+
+    // Add search query if present
+    if (query.value) {
+      params.append("name", query.value);
+    }
+
+    // Handle scenario where no filters and no search query
+    if (!query.value && !selectedFilter.value) {
+      meals.value = []; // Reset meals if no input
+      return;
+    }
+
+    // Fetch meals from backend
+    const response = await api.get(
+      `/api/meals/search-filter?${params.toString()}`
+    );
+    meals.value = response.data.map((meal) => ({
       id: meal.id,
       name: meal.name,
       thumbnail: meal.thumbnail,
       instructions: meal.instructions || "No instructions available.",
       ingredients: meal.ingredients,
       category: meal.category || "Unknown",
+      youTubeVid: meal.youTubeVid || "",
     }));
   } catch (error) {
-    console.error("Error fetching all meals:", error);
-  }
-}
-
-async function applyFilters() {
-  try {
-    if (!selectedFilter.value) {
-      await fetchAllMeals();
-      return;
-    }
-    let url = "/api/meals/filter";
-    const params = new URLSearchParams();
-
-    // Determine if the selected filter is a category or area
-    const selected = combinedFilters.value.find(
-      (filter) => filter.value === selectedFilter.value
-    );
-    if (selected) {
-      if (selected.type === "Category") {
-        params.append("category", selected.value);
-      } else if (selected.type === "Area") {
-        params.append("area", selected.value);
-      }
-    }
-    url += `?${params.toString()}`;
-
-    const response = await api.get(url);
-    meals.value = (response.data.meals || []).map((meal: any) => ({
-      id: meal.idMeal,
-      name: meal.strMeal,
-      thumbnail: meal.strMealThumb,
-    }));
-  } catch (error) {
-    console.error("Error applying filters:", error);
-  }
-}
-
-async function searchMeals() {
-  if (query.value) {
-    try {
-      // Fetch meals from API
-      const apiResponse = await api.get("/api/meals/search", {
-        params: { name: query.value },
-      });
-
-      const apiMeals = (apiResponse.data.meals || []).map((meal: any) => ({
-        id: meal.idMeal,
-        name: meal.strMeal,
-        thumbnail: meal.strMealThumb,
-        instructions: meal.strInstructions || "No instructions available.",
-        ingredients: extractIngredients(meal),
-        category: meal.strCategory || "Unknown",
-        youTubeVid: meal.strYoutube || "",
-      }));
-
-      // Fetch custom meals from the database
-      const dbResponse = await api.get("/api/meals/custom/search", {
-        params: { name: query.value },
-      });
-
-      const dbMeals = (dbResponse.data || []).map((meal: any) => ({
-        id: meal.id,
-        name: meal.name,
-        thumbnail: meal.thumbnail,
-        instructions: meal.instructions || "No instructions available.",
-        ingredients: meal.ingredients,
-        category: meal.category || "Unknown",
-        youTubeVid: meal.youTubeVid || "",
-      }));
-
-      // Merge API and DB meals, avoiding duplicates by ID
-      const uniqueMeals = [...apiMeals, ...dbMeals].reduce((acc, meal) => {
-        if (!acc.some((m) => m.id === meal.id)) {
-          acc.push(meal);
-        }
-        return acc;
-      }, []);
-
-      meals.value = uniqueMeals;
-    } catch (error) {
-      console.error("Error fetching meals:", error);
-    }
-  } else {
-    meals.value = [];
+    console.error("Error fetching meals with filters and search:", error);
   }
 }
 
@@ -328,6 +277,22 @@ async function viewMeal(mealId: string) {
   margin: 0 auto;
   padding: 20px;
   text-align: center;
+}
+.search-submit-button {
+  padding: 10px;
+  font-size: 1rem;
+  background-color: #e3f6e8;
+  color: #28a745;
+  border: 2px solid #89cff0;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.search-submit-button:hover {
+  background-color: #218838;
+  color: #fff;
 }
 
 /* Heading (title) Styling */

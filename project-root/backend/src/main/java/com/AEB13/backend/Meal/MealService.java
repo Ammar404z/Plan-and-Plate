@@ -1,5 +1,7 @@
 package com.AEB13.backend.Meal;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Service class for handling business logic related to {@link Meal} operations.
@@ -42,13 +46,20 @@ public class MealService {
      * @param name the name of the meal to search
      * @return a map containing the JSON response from TheMealDB API
      */
-    public Map<String, Object> searchMealByName(String name) {
+    public List<Meal> searchMealByName(String name) {
         String url = String.format("%s/search.php?s=%s", apiUrl, name);
-        return restTemplate.getForObject(url, Map.class);
+        try {
+            String response = restTemplate.getForObject(url, String.class);
+            return parseMealDBResponse(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>(); // Return an empty list if there is an error
+        }
     }
 
     /**
-     * Adds a meal to the database or increments the saved count if it already exists.
+     * Adds a meal to the database or increments the saved count if it already
+     * exists.
      *
      * @param meal the Meal object to be added or updated
      * @return the persisted Meal object
@@ -65,7 +76,8 @@ public class MealService {
     }
 
     /**
-     * Adds a custom meal to the database, setting a default thumbnail if none is provided.
+     * Adds a custom meal to the database, setting a default thumbnail if none is
+     * provided.
      *
      * @param meal the custom Meal object to be saved
      * @return the newly created Meal entity
@@ -103,5 +115,27 @@ public class MealService {
         Meal meal = mealRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Meal not found"));
         mealRepository.delete(meal);
+    }
+
+    public List<Meal> parseMealDBResponse(String responseBody) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> responseMap = objectMapper.readValue(responseBody, Map.class);
+            List<Map<String, String>> meals = (List<Map<String, String>>) responseMap.get("meals");
+
+            List<Meal> mealList = new ArrayList<>();
+            for (Map<String, String> mealData : meals) {
+                Meal meal = new Meal();
+                meal.setId(Long.parseLong(mealData.get("idMeal"))); // Assuming idMeal is a Long
+                meal.setName(mealData.get("strMeal"));
+                meal.setThumbnail(mealData.get("strMealThumb"));
+                // Add more fields as required
+                mealList.add(meal);
+            }
+            return mealList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
 }

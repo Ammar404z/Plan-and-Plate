@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -185,18 +186,6 @@ public class MealController {
     }
 
     /**
-     * Retrieves the top 5 meals based on saved count, in descending order.
-     *
-     * @return a list of the top 5 most saved meals
-     */
-    @GetMapping("/api/statistics/top-saved-recipes")
-    public List<Meal> getTopSavedMeals() {
-        List<Meal> meals = mealRepository.findTop5ByOrderBySavedCountDesc();
-        System.out.println("Top saved meals: " + meals); // Debug log
-        return meals;
-    }
-
-    /**
      * Toggles the favorite status of a specific meal by its ID.
      *
      * @param id the ID of the meal whose favorite status to toggle
@@ -225,4 +214,58 @@ public class MealController {
     public List<Meal> searchCustomMeals(@RequestParam String name) {
         return mealRepository.findByNameContainingIgnoreCase(name);
     }
+
+    // all search logic in one method(filter, search, custom meal search and search
+    // + filter logic)
+    @GetMapping("/api/meals/search-filter")
+    public ResponseEntity<List<Meal>> searchAndFilterMeals(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String area) {
+
+        if ((category == null || category.isEmpty()) && (area == null || area.isEmpty())) {
+            if (name != null && !name.isEmpty()) {
+                List<Meal> meals = mealService.searchMealByName(name);
+                return ResponseEntity.ok(meals);
+            }
+        }
+
+        List<Meal> combinedMeals = new ArrayList<>();
+
+        // Fetch meals from MealDB based on category or area
+        if (category != null || area != null) {
+            String filterEndpoint = (category != null)
+                    ? themealdbApiUrl + "/filter.php?c=" + category
+                    : themealdbApiUrl + "/filter.php?a=" + area;
+
+            try {
+                ResponseEntity<String> response = restTemplate.getForEntity(filterEndpoint, String.class);
+                List<Meal> filteredMeals = mealService.parseMealDBResponse(response.getBody());
+                combinedMeals.addAll(filteredMeals);
+            } catch (Exception e) {
+                return ResponseEntity.status(500).body(null);
+            }
+        }
+
+        // Fetch custom meals from the database
+        if (name != null) {
+            combinedMeals.addAll(mealRepository.findByNameContainingIgnoreCase(name));
+        } else {
+            combinedMeals.addAll(mealRepository.findAll());
+        }
+
+        // Apply search logic
+        if (name != null) {
+            combinedMeals = combinedMeals.stream()
+                    .filter(meal -> meal.getName().toLowerCase().contains(name.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        // Remove duplicates
+        Map<Long, Meal> uniqueMeals = combinedMeals.stream()
+                .collect(Collectors.toMap(Meal::getId, meal -> meal, (existing, replacement) -> existing));
+
+        return ResponseEntity.ok(new ArrayList<>(uniqueMeals.values()));
+    }
+
 }
