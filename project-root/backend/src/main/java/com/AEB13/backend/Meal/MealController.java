@@ -201,55 +201,57 @@ public class MealController {
      * @param name the name (or partial name) of the custom meal to search
      * @return a list of custom meals that match the search criteria
      */
-    @GetMapping("/api/meals/custom/search")
-    public List<Meal> searchCustomMeals(@RequestParam String name) {
-        return mealRepository.findByNameContainingIgnoreCase(name);
-    }
-
-    // all search logic in one method(filter, search, custom meal search and search
-    // + filter logic)
     @GetMapping("/api/meals/search-filter")
     public ResponseEntity<List<Meal>> searchAndFilterMeals(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String area) {
 
-        if ((category == null || category.isEmpty()) && (area == null || area.isEmpty())) {
-            if (name != null && !name.isEmpty()) {
-                List<Meal> meals = mealService.searchMealByName(name);
-                return ResponseEntity.ok(meals);
-            }
-        }
-
         List<Meal> combinedMeals = new ArrayList<>();
 
-        // Fetch meals from MealDB based on category or area
+        // Handle filtered scenarios (category or area)
         if (category != null || area != null) {
-            String filterEndpoint = (category != null)
-                    ? themealdbApiUrl + "/filter.php?c=" + category
-                    : themealdbApiUrl + "/filter.php?a=" + area;
-
             try {
+                // Fetch filtered meals from MealDB if category or area is provided
+                String filterEndpoint = (category != null)
+                        ? themealdbApiUrl + "/filter.php?c=" + category
+                        : themealdbApiUrl + "/filter.php?a=" + area;
+
                 ResponseEntity<String> response = restTemplate.getForEntity(filterEndpoint, String.class);
-                List<Meal> filteredMeals = mealService.parseMealDBResponse(response.getBody());
-                combinedMeals.addAll(filteredMeals);
+                List<Meal> filteredApiMeals = mealService.parseMealDBResponse(response.getBody());
+
+                // If name is provided, filter API meals by name
+                if (name != null && !name.isEmpty()) {
+                    filteredApiMeals = filteredApiMeals.stream()
+                            .filter(meal -> meal.getName().toLowerCase().contains(name.toLowerCase()))
+                            .collect(Collectors.toList());
+                }
+
+                // For category filter, include custom meals
+                if (category != null) {
+                    List<Meal> filteredCustomMeals = mealRepository.findAll().stream()
+                            .filter(meal -> meal.getCategory().equalsIgnoreCase(category) &&
+                                    (name == null || meal.getName().toLowerCase().contains(name.toLowerCase())))
+                            .collect(Collectors.toList());
+                    combinedMeals.addAll(filteredCustomMeals);
+                }
+
+                // Combine filtered API meals
+                combinedMeals.addAll(filteredApiMeals);
             } catch (Exception e) {
                 return ResponseEntity.status(500).body(null);
             }
         }
-
-        // Fetch custom meals from the database
-        if (name != null) {
-            combinedMeals.addAll(mealRepository.findByNameContainingIgnoreCase(name));
-        } else {
-            combinedMeals.addAll(mealRepository.findAll());
-        }
-
-        // Apply search logic
-        if (name != null) {
-            combinedMeals = combinedMeals.stream()
-                    .filter(meal -> meal.getName().toLowerCase().contains(name.toLowerCase()))
-                    .collect(Collectors.toList());
+        // Handle no filters scenario
+        else {
+            if (name != null && !name.isEmpty()) {
+                List<Meal> apiMeals = mealService.searchMealByName(name);
+                List<Meal> customMeals = mealRepository.findByNameContainingIgnoreCase(name);
+                combinedMeals.addAll(apiMeals);
+                combinedMeals.addAll(customMeals);
+            } else {
+                combinedMeals.addAll(mealRepository.findAll());
+            }
         }
 
         // Remove duplicates
@@ -258,5 +260,4 @@ public class MealController {
 
         return ResponseEntity.ok(new ArrayList<>(uniqueMeals.values()));
     }
-
 }

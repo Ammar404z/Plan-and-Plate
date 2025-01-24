@@ -59,6 +59,27 @@
         <!-- Input for meal thumbnail URL -->
         <input id="thumbnail" v-model="meal.thumbnail" />
       </div>
+      <div>
+        <label for="category">Category:</label>
+        <!-- Dropdown for selecting category -->
+        <select id="category" v-model="meal.category" required>
+          <option value="" disabled selected>Select a category</option>
+          <option value="Beef">Category: Beef</option>
+          <option value="Breakfast">Category: Breakfast</option>
+          <option value="Chicken">Category: Chicken</option>
+          <option value="Dessert">Category: Dessert</option>
+          <option value="Goat">Category: Goat</option>
+          <option value="Lamb">Category: Lamb</option>
+          <option value="Miscellaneous">Category: Miscellaneous</option>
+          <option value="Pasta">Category: Pasta</option>
+          <option value="Pork">Category: Pork</option>
+          <option value="Seafood">Category: Seafood</option>
+          <option value="Side">Category: Side</option>
+          <option value="Starter">Category: Starter</option>
+          <option value="Vegan">Category: Vegan</option>
+          <option value="Vegetarian">Category: Vegetarian</option>
+        </select>
+      </div>
       <!-- Submit button to save the meal -->
       <button type="submit">Add Meal</button>
       <!-- Cancel button to navigate back to saved meals -->
@@ -79,6 +100,7 @@ const meal = ref({
   ingredients: "",
   instructions: "",
   thumbnail: "",
+  category: "",
 });
 
 // Array to hold individual ingredient components
@@ -120,6 +142,10 @@ async function addMeal() {
     // Ensure all fields are properly filled
     if (!meal.value.ingredients) {
       alert("Please add at least one ingredient.");
+      return;
+    }
+    if (!meal.value.category) {
+      alert("Please select a category.");
       return;
     }
 
@@ -254,5 +280,18 @@ button[type="submit"]:hover {
   gap: 10px;
   align-items: center;
   margin-bottom: 10px;
+}
+select {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: border-color 0.2s;
+}
+
+select:focus {
+  border-color: #007bff;
+  outline: none;
 }
 </style>
