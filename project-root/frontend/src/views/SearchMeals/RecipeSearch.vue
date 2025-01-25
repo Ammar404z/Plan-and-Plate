@@ -45,7 +45,11 @@
                1) Save Recipe - View Meal
                2) Share (below, centered) -->
           <div class="button-row">
-            <button class="meal-button" @click="saveRecipe(meal)">
+            <button
+              v-if="meal.custom === false"
+              class="meal-button"
+              @click="saveRecipe(meal)"
+            >
               <font-awesome-icon :icon="['fas', 'save']" /> Save
             </button>
             <button
@@ -82,6 +86,7 @@ interface Meal {
   thumbnail: string;
   category: string;
   youTubeVid: string;
+  custom: boolean;
   [key: string]: any;
 }
 const router = useRouter();
