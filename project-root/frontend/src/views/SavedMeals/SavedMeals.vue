@@ -53,7 +53,9 @@
 
         <!-- Buttons -->
         <button @click="deleteMeal(meal.id)">Delete Meal</button>
-        <button @click="viewMeal(meal.id, meal.custom)">View Meal</button>
+        <button @click="viewMeal(meal.id, meal.apiId, meal.custom)">
+          View Meal
+        </button>
         <button
           v-if="meal.youTubeVid"
           @click="watchYouTubeVid(meal.youTubeVid)"
@@ -124,11 +126,11 @@ async function deleteMeal(id: string) {
   }
 }
 
-async function viewMeal(mealId: string, isCustom: boolean) {
+async function viewMeal(mealId: string, mealApiId: string, isCustom: boolean) {
   if (isCustom) {
     router.push(`/viewCustom-meal/${mealId}`);
   } else {
-    router.push(`/view-meal/${mealId}`);
+    router.push(`/view-meal/${mealApiId}`);
   }
 }
 
