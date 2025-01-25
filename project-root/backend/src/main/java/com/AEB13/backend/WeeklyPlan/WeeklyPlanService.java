@@ -19,7 +19,8 @@ import com.AEB13.backend.Meal.Meal;
 import com.AEB13.backend.Meal.MealRepository;
 
 /**
- * Service class containing business logic for managing and generating data related to {@link WeeklyPlan}.
+ * Service class containing business logic for managing and generating data
+ * related to {@link WeeklyPlan}.
  */
 @Service
 public class WeeklyPlanService {
@@ -40,17 +41,20 @@ public class WeeklyPlanService {
 
     /**
      * Generates a shopping list grouped by meals within a specified weekly plan.
-     * <p>The default multiplier scales ingredient quantities for each meal.</p>
+     * <p>
+     * The default multiplier scales ingredient quantities for each meal.
+     * </p>
      *
      * @param weeklyPlanId      the ID of the weekly plan
      * @param defaultMultiplier the default scaling factor for each meal
-     * @return a list of maps representing the shopping list for each day
+     * @return a map representing the shopping list
      * @throws IllegalStateException if no valid meals are found in the plan
      */
-    public List<Map<String, Object>> generateShoppingList(Long weeklyPlanId, int defaultMultiplier) {
+    public Map<String, Object> generateShoppingList(Long weeklyPlanId) {
         WeeklyPlan weeklyPlan = getWeeklyPlan(weeklyPlanId);
 
-        List<Map<String, Object>> shoppingList = new ArrayList<>();
+        Map<String, Integer> nonNumericCounts = new HashMap<>(); // New map for non-numeric counts
+        Map<String, Double> aggregatedIngredients = new HashMap<>();
         List<String> skippedMeals = new ArrayList<>();
 
         for (Map.Entry<String, Long> entry : weeklyPlan.getMeals().entrySet()) {
@@ -67,23 +71,12 @@ public class WeeklyPlanService {
 
                 Meal meal = mealOptional.get();
 
+                // Get scaling factor for the day or default to 1
+                Integer scalingFactor = weeklyPlan.getPortionSizes().getOrDefault(day, 1);
+
                 // Parse and scale ingredients for the current meal
-                Map<String, Double> ingredientsMap = new HashMap<>();
-                parseAndAggregateIngredients(meal.getIngredients(), ingredientsMap, defaultMultiplier);
-
-                // Add meal details to the shopping list
-                Map<String, Object> mealDetails = new HashMap<>();
-                mealDetails.put("day", day);
-                mealDetails.put("mealName", meal.getName());
-                mealDetails.put("ingredients", formatShoppingList(ingredientsMap, defaultMultiplier));
-                mealDetails.put("scalingFactor", defaultMultiplier);
-
-                // Add skipped meals information if any
-                if (!skippedMeals.isEmpty()) {
-                    mealDetails.put("skippedMeals", skippedMeals);
-                }
-
-                shoppingList.add(mealDetails);
+                parseAndAggregateIngredients(meal.getIngredients(), aggregatedIngredients, scalingFactor,
+                        nonNumericCounts);
 
             } catch (Exception e) {
                 logger.warn("Failed to process meal for {}: {}", day, e.getMessage());
@@ -91,22 +84,32 @@ public class WeeklyPlanService {
             }
         }
 
-        if (shoppingList.isEmpty()) {
+        if (aggregatedIngredients.isEmpty()) {
             throw new IllegalStateException("No valid meals found in the weekly plan");
         }
 
-        return shoppingList;
+        // Format the aggregated ingredients for output
+        Map<String, String> formattedIngredients = formatShoppingList(aggregatedIngredients, nonNumericCounts);
+
+        // Create the final shopping list result
+        Map<String, Object> shoppingListResult = new HashMap<>();
+        shoppingListResult.put("ingredients", formattedIngredients);
+        shoppingListResult.put("skippedMeals", skippedMeals);
+
+        return shoppingListResult;
     }
 
     /**
-     * Parses the ingredient string from a Meal and accumulates scaled quantities in a consolidated map.
+     * Parses the ingredient string from a Meal and accumulates scaled quantities in
+     * a consolidated map.
      *
-     * @param ingredients            the raw ingredient string from the Meal
+     * @param ingredients             the raw ingredient string from the Meal
      * @param consolidatedIngredients the map to store scaled ingredient data
-     * @param multiplier             the scaling factor for each ingredient
+     * @param multiplier              the scaling factor for each ingredient
+     * @param nonNumericCounts        the number of counts for no numeric quantities
      */
     private void parseAndAggregateIngredients(String ingredients, Map<String, Double> consolidatedIngredients,
-                                              int multiplier) {
+            int multiplier, Map<String, Integer> nonNumericCounts) {
         String[] items = ingredients.split(",");
 
         for (String item : items) {
@@ -141,6 +144,7 @@ public class WeeklyPlanService {
                         // Handle non-numeric quantities
                         String key = ingredient + " (" + quantityString + ")";
                         consolidatedIngredients.putIfAbsent(key, -1.0);
+                        nonNumericCounts.merge(key, multiplier, Integer::sum); // Add the multiplier to the count
                     }
                 } catch (NumberFormatException e) {
                     // Handle non-numeric quantities
@@ -152,9 +156,11 @@ public class WeeklyPlanService {
     }
 
     /**
-     * Converts common fraction characters (¼, ½, ¾) to their numeric equivalents ("1/4", "1/2", "3/4").
+     * Converts common fraction characters (¼, ½, ¾) to their numeric equivalents
+     * ("1/4", "1/2", "3/4").
      *
-     * @param input the original string potentially containing special fraction characters
+     * @param input the original string potentially containing special fraction
+     *              characters
      * @return the string with special fractions replaced by numeric fractions
      */
     private String convertSpecialFractions(String input) {
@@ -165,13 +171,15 @@ public class WeeklyPlanService {
     }
 
     /**
-     * Normalizes various unit strings to a standard format (e.g., "tablespoon" -> "tbsp").
+     * Normalizes various unit strings to a standard format (e.g., "tablespoon" ->
+     * "tbsp").
      *
      * @param unit the original unit string
      * @return a normalized unit string
      */
     private String normalizeUnit(String unit) {
-        if (unit == null) return "";
+        if (unit == null)
+            return "";
         unit = unit.toLowerCase().trim();
         switch (unit) {
             case "tsp":
@@ -203,7 +211,9 @@ public class WeeklyPlanService {
 
     /**
      * Parses a fraction or numeric string into a double.
-     * <p>Handles both fraction (e.g., "1/2") and decimal (e.g., "0.5") formats.</p>
+     * <p>
+     * Handles both fraction (e.g., "1/2") and decimal (e.g., "0.5") formats.
+     * </p>
      *
      * @param input the string to parse
      * @return the numeric value
@@ -224,39 +234,47 @@ public class WeeklyPlanService {
     }
 
     /**
-     * Converts a map of scaled ingredients to a formatted map for display or output.
+     * Converts a map of scaled ingredients to a formatted map for display or
+     * output.
      *
-     * @param consolidatedIngredients the map containing ingredient keys and numeric values
-     * @param multiplier             the scaling factor used for the plan
+     * @param consolidatedIngredients the map containing ingredient keys and numeric
+     *                                values
+     * @param multiplier              the scaling factor used for the plan
+     * @param nonNumericCounts        the number of counts for no numeric quantities
      * @return a map of ingredient keys and their formatted quantities
      */
-    private Map<String, String> formatShoppingList(Map<String, Double> consolidatedIngredients, int multiplier) {
+    private Map<String, String> formatShoppingList(Map<String, Double> consolidatedIngredients,
+            Map<String, Integer> nonNumericCounts) {
         Map<String, String> shoppingList = new HashMap<>();
 
         for (Map.Entry<String, Double> entry : consolidatedIngredients.entrySet()) {
             String ingredient = entry.getKey();
             Double quantity = entry.getValue();
 
-            if (quantity == -1.0) {
-                // For non-numerical ingredients, retain the original measurement
-                shoppingList.put(ingredient, multiplier + "x original measurement");
-            } else {
-                // For numerical ingredients, format normally
+            if (quantity != -1.0) {
                 shoppingList.put(ingredient, String.format("%.2f", quantity));
             }
+        }
+
+        for (Map.Entry<String, Integer> entry : nonNumericCounts.entrySet()) {
+            String ingredient = entry.getKey();
+            Integer totalMultiplier = entry.getValue(); // Total count includes scaling
+            shoppingList.put(ingredient, totalMultiplier + "x " + ingredient.split("\\(")[1].replace(")", ""));
         }
 
         return shoppingList;
     }
 
     /**
-     * Sorts a map of day-to-meal associations in a natural weekly order (Monday -> Sunday).
+     * Sorts a map of day-to-meal associations in a natural weekly order (Monday ->
+     * Sunday).
      *
      * @param meals the unsorted map of days to meal IDs
      * @return a new map sorted by day of the week
      */
     private Map<String, Long> sortDays(Map<String, Long> meals) {
-        List<String> dayOrder = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
+        List<String> dayOrder = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+                "Sunday");
         return meals.entrySet()
                 .stream()
                 .sorted(Comparator.comparingInt(entry -> dayOrder.indexOf(entry.getKey())))
@@ -290,12 +308,21 @@ public class WeeklyPlanService {
      *
      * @param weeklyPlan the new weekly plan to create
      * @return the saved {@link WeeklyPlan} entity
-     * @throws IllegalArgumentException if a plan for the specified week already exists
+     * @throws IllegalArgumentException if a plan for the specified week already
+     *                                  exists
      */
     public WeeklyPlan createWeeklyPlan(WeeklyPlan weeklyPlan) {
         Optional<WeeklyPlan> existingPlan = weeklyPlanRepository.findByWeek(weeklyPlan.getWeek());
         if (existingPlan.isPresent()) {
             throw new IllegalArgumentException("A plan for this week already exists.");
+        }
+        // Validate portion sizes
+        if (weeklyPlan.getPortionSizes() != null) {
+            for (String day : weeklyPlan.getPortionSizes().keySet()) {
+                if (!weeklyPlan.getMeals().containsKey(day)) {
+                    throw new IllegalArgumentException("Portion size specified for a day without a meal.");
+                }
+            }
         }
         return weeklyPlanRepository.save(weeklyPlan);
     }
@@ -307,9 +334,10 @@ public class WeeklyPlanService {
      * @param meals the new mapping of days to meal IDs
      * @return the updated {@link WeeklyPlan} entity
      */
-    public WeeklyPlan updateWeeklyPlan(Long id, Map<String, Long> meals) {
+    public WeeklyPlan updateWeeklyPlan(Long id, WeeklyPlan weeklyPlan) {
         WeeklyPlan plan = getWeeklyPlan(id);
-        plan.setMeals(meals);
+        plan.setMeals(weeklyPlan.getMeals());
+        plan.setPortionSizes(weeklyPlan.getPortionSizes());
         return weeklyPlanRepository.save(plan);
     }
 
@@ -327,7 +355,8 @@ public class WeeklyPlanService {
     }
 
     /**
-     * Retrieves all weekly plans, sorts each plan's meals by day, and optionally sorts the plans by week.
+     * Retrieves all weekly plans, sorts each plan's meals by day, and optionally
+     * sorts the plans by week.
      *
      * @return a list of all sorted {@link WeeklyPlan} entities
      */

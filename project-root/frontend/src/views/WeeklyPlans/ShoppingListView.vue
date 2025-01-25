@@ -2,63 +2,42 @@
   <div class="shopping-list-view">
     <h1>Shopping List</h1>
 
-    <!-- Display a warning for any skipped meals -->
+    <!-- Display a warning for skipped meals -->
     <div v-if="skippedMeals.length > 0" class="skipped-meals-warning">
       <p>Some meals were not found and have been skipped:</p>
       <ul>
-        <!-- List the days for which meals were skipped -->
         <li v-for="day in skippedMeals" :key="day">{{ day }}</li>
       </ul>
     </div>
 
-    <!-- Display the shopping list if there are meals available -->
+    <!-- Display the shopping list -->
     <div v-if="shoppingList.length > 0">
-      <!-- Loop through the shopping list and display each meal's details -->
-      <div v-for="meal in shoppingList" :key="meal.mealName" class="meal-group">
-        <!-- Display the day and meal name -->
-        <h3>{{ meal.day }} - {{ meal.mealName }}</h3>
-
-        <!-- Allow the user to adjust portion size -->
-        <div class="meal-scaling">
-          <label for="scaling">Portion Size:</label>
+      <ul class="ingredients-list">
+        <li
+          v-for="ingredient in shoppingList"
+          :key="ingredient.name"
+          class="ingredient-item"
+        >
+          <!-- Checkbox for marking ingredients as bought -->
           <input
-            type="number"
-            v-model.number="meal.scalingFactor"
-            @input="updateMealScaling(meal)"
-            placeholder="Enter portion size"
-            min="1"
+            type="checkbox"
+            v-model="ingredient.isChecked"
+            class="ingredient-checkbox"
           />
-        </div>
-
-        <!-- Display the list of ingredients for the meal -->
-        <ul>
-          <li
-            v-for="ingredient in meal.ingredients"
-            :key="ingredient.name"
-            class="ingredient-item"
-          >
-            <!-- Checkbox for marking ingredients as bought -->
-            <input
-              type="checkbox"
-              v-model="ingredient.isChecked"
-              class="ingredient-checkbox"
-            />
-            <!-- Display the ingredient thumbnail with a fallback for errors -->
-            <img
-              :src="getIngredientThumbnail(ingredient.name)"
-              :alt="ingredient.name"
-              class="ingredient-thumbnail"
-              @error="setDefaultThumbnail($event)"
-            />
-            <!-- Display the ingredient name and scaled quantity -->
-            <span :class="{ checked: ingredient.isChecked }">
-              {{ ingredient.name }}: {{ ingredient.scaledQuantity }}
-            </span>
-          </li>
-        </ul>
-      </div>
+          <!-- Display the ingredient thumbnail with a fallback for errors -->
+          <img
+            :src="getIngredientThumbnail(ingredient.name)"
+            :alt="ingredient.name"
+            class="ingredient-thumbnail"
+            @error="setDefaultThumbnail($event)"
+          />
+          <!-- Display the ingredient name and quantity -->
+          <span :class="{ checked: ingredient.isChecked }">
+            {{ ingredient.name }}: {{ ingredient.quantity }}
+          </span>
+        </li>
+      </ul>
     </div>
-    <!-- Message for when the shopping list is loading or empty -->
     <p v-else>Loading shopping list or no meals available...</p>
   </div>
 </template>
@@ -101,44 +80,20 @@ async function fetchShoppingList() {
     const response = await api.get(`/api/shopping-list/${planId}`);
     console.log("Backend Response:", response.data);
 
-    // Extract skipped meals from the first entry in the response, if any
-    if (response.data[0]?.skippedMeals) {
-      skippedMeals.value = response.data[0].skippedMeals;
-    }
+    // Extract skipped meals, if any
+    skippedMeals.value = response.data.skippedMeals || [];
 
-    // Map the backend data to the shoppingList format
-    shoppingList.value = response.data.map((meal: any) => ({
-      ...meal,
-      ingredients: Object.entries(meal.ingredients).map(([name, quantity]) => ({
+    // Map the ingredients to a format suitable for the frontend
+    shoppingList.value = Object.entries(response.data.ingredients).map(
+      ([name, quantity]) => ({
         name,
         quantity,
-        scaledQuantity: quantity, // Initially set to the original quantity
         isChecked: false, // Default state for the checkbox
-      })),
-    }));
+      })
+    );
   } catch (error) {
     console.error("Failed to fetch shopping list:", error); // Log errors
   }
-}
-
-// Update the quantities of ingredients based on the scaling factor
-function updateMealScaling(meal: any) {
-  meal.ingredients.forEach((ingredient: any) => {
-    // Handle ingredients with "original measurement" text
-    if (ingredient.quantity.includes("original measurement")) {
-      ingredient.scaledQuantity = `${meal.scalingFactor}x original measurement`;
-    } else {
-      // Split the quantity into numeric and unit parts for scaling
-      const [amount, unit] = ingredient.quantity.split(" ");
-      if (!isNaN(parseFloat(amount))) {
-        ingredient.scaledQuantity = `${(
-          parseFloat(amount) * meal.scalingFactor
-        ).toFixed(2)} ${unit || ""}`.trim();
-      } else {
-        ingredient.scaledQuantity = ingredient.quantity; // Keep unchanged if not numeric
-      }
-    }
-  });
 }
 
 // Generate the thumbnail URL for an ingredient
@@ -194,6 +149,34 @@ onMounted(() => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.ingredients-list {
+  list-style: none;
+  padding: 0;
+}
+
+.ingredient-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ingredient-thumbnail {
+  width: 80px;
+  height: 80px;
+  margin-right: 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.ingredient-checkbox {
+  margin-right: 10px;
+}
+
+.checked {
+  text-decoration: line-through;
+  color: #999;
+}
+
 /* Warn about skipped meals */
 .skipped-meals-warning {
   margin: 20px 0;
@@ -204,41 +187,6 @@ onMounted(() => {
   color: #856404;
 }
 
-/* Each meal “card” */
-.meal-group {
-  margin-bottom: 20px;
-  padding: 15px;
-  border: 1px solid #cce7ff;
-  border-radius: 8px;
-  background-color: #f1faff;
-}
-
-.meal-group h3 {
-  margin-bottom: 10px;
-  font-size: 1.2rem;
-  color: #00509e; /* deeper blue */
-}
-
-.meal-scaling {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.meal-scaling label {
-  margin-right: 10px;
-  font-size: 1rem;
-  color: #555;
-}
-
-.meal-scaling input {
-  padding: 8px;
-  font-size: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 100px;
-  text-align: center;
-}
 .checked {
   text-decoration: line-through;
   color: #999;

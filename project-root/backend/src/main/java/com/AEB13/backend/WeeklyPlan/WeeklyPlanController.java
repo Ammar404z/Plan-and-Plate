@@ -29,14 +29,17 @@ public class WeeklyPlanController {
 
     /**
      * Generates and retrieves a shopping list for a specific weekly plan.
-     * <p>The shopping list is grouped by days and scaled based on a default multiplier.</p>
+     * <p>
+     * The shopping list is grouped by days and scaled based on a default
+     * multiplier.
+     * </p>
      *
      * @param planId the ID of the weekly plan
      * @return a list of maps containing ingredient details for each day
      */
     @GetMapping("/shopping-list/{planId}")
-    public ResponseEntity<List<Map<String, Object>>> getShoppingList(@PathVariable Long planId) {
-        return ResponseEntity.ok(weeklyPlanService.generateShoppingList(planId, 1));
+    public ResponseEntity<Map<String, Object>> getShoppingList(@PathVariable Long planId) {
+        return ResponseEntity.ok(weeklyPlanService.generateShoppingList(planId));
     }
 
     /**
@@ -63,10 +66,13 @@ public class WeeklyPlanController {
 
     /**
      * Creates a new weekly plan.
-     * <p>A plan for the specified week will be rejected if it already exists.</p>
+     * <p>
+     * A plan for the specified week will be rejected if it already exists.
+     * </p>
      *
      * @param weeklyPlan the new weekly plan to create
-     * @return the created {@link WeeklyPlan} if successful, otherwise an error message
+     * @return the created {@link WeeklyPlan} if successful, otherwise an error
+     *         message
      */
     @PostMapping("/create-weekly-plans")
     public ResponseEntity<?> createWeeklyPlan(@RequestBody WeeklyPlan weeklyPlan) {
@@ -86,8 +92,8 @@ public class WeeklyPlanController {
      * @return the updated {@link WeeklyPlan} object
      */
     @PutMapping("/create-weekly-plans/{id}")
-    public ResponseEntity<WeeklyPlan> updateWeeklyPlan(@PathVariable Long id, @RequestBody Map<String, Long> meals) {
-        return ResponseEntity.ok(weeklyPlanService.updateWeeklyPlan(id, meals));
+    public ResponseEntity<WeeklyPlan> updateWeeklyPlan(@PathVariable Long id, @RequestBody WeeklyPlan request) {
+        return ResponseEntity.ok(weeklyPlanService.updateWeeklyPlan(id, request));
     }
 
     /**

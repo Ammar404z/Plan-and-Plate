@@ -15,8 +15,12 @@ import jakarta.persistence.MapKeyColumn;
 import jakarta.persistence.Table;
 
 /**
- * Represents a weekly meal plan entity that associates specific meals with specific days.
- * <p>Each plan is identified by a unique week number and contains a mapping of days to meal IDs.</p>
+ * Represents a weekly meal plan entity that associates specific meals with
+ * specific days.
+ * <p>
+ * Each plan is identified by a unique week number and contains a mapping of
+ * days to meal IDs.
+ * </p>
  */
 @Entity
 @Table(name = "weekly_plans")
@@ -31,20 +35,30 @@ public class WeeklyPlan {
 
     /**
      * The week number for this plan.
-     * <p>Uniqueness is enforced in the database to ensure one plan per week.</p>
+     * <p>
+     * Uniqueness is enforced in the database to ensure one plan per week.
+     * </p>
      */
     @Column(unique = true)
     private int week;
 
     /**
      * A map associating days of the week (e.g., "Monday") with meal IDs.
-     * <p>Stored as a collection table named "weekly_plan_meals".</p>
+     * <p>
+     * Stored as a collection table named "weekly_plan_meals".
+     * </p>
      */
     @ElementCollection
     @CollectionTable(name = "weekly_plan_meals", joinColumns = @JoinColumn(name = "weekly_plan_id"))
     @MapKeyColumn(name = "day")
     @Column(name = "meal_id")
     private Map<String, Long> meals = new HashMap<>();
+
+    @ElementCollection
+    @CollectionTable(name = "weekly_plan_portion_sizes", joinColumns = @JoinColumn(name = "weekly_plan_id"))
+    @MapKeyColumn(name = "day")
+    @Column(name = "portion_size")
+    private Map<String, Integer> portionSizes = new HashMap<>();
 
     /**
      * Retrieves the unique identifier of the weekly plan.
@@ -98,5 +112,13 @@ public class WeeklyPlan {
      */
     public void setMeals(Map<String, Long> meals) {
         this.meals = meals;
+    }
+
+    public Map<String, Integer> getPortionSizes() {
+        return portionSizes;
+    }
+
+    public void setPortionSizes(Map<String, Integer> portionSizes) {
+        this.portionSizes = portionSizes;
     }
 }

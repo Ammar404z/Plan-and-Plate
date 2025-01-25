@@ -10,14 +10,25 @@
         class="day-meal-entry"
       >
         <label :for="day">{{ day }}</label>
+        <!-- Meal selection dropdown -->
         <select v-model="updatedMeals[day]" :id="day">
-          <option value="">-- Select a Meal --</option>
+          <option value="">-- No Meal --</option>
+          <!-- Allow no meal -->
           <option v-for="meal in meals" :key="meal.id" :value="meal.id">
             {{ meal.name }}
           </option>
         </select>
-      </div>
 
+        <!-- Portion size input -->
+        <input
+          required
+          v-model.number="portionSizes[day]"
+          type="number"
+          min="1"
+          placeholder="Portion Size"
+          :disabled="!updatedMeals[day]"
+        />
+      </div>
       <!-- Action buttons -->
       <div class="actions">
         <button type="submit">Save</button>
@@ -37,6 +48,7 @@ const router = useRouter();
 const planId = route.params.planId;
 
 const updatedMeals = ref({});
+const portionSizes = ref({});
 const meals = ref([]);
 const plan = ref({});
 const allDays = [
@@ -52,17 +64,17 @@ const allDays = [
 // Fetch the weekly plan and available meals
 const fetchPlanAndMeals = async () => {
   try {
-    // Fetch weekly plan by ID
     const planResponse = await api.get(`/api/create-weekly-plans/${planId}`);
     plan.value = planResponse.data;
 
-    // Initialize updatedMeals with all days
+    // Initialize updatedMeals and portionSizes
     updatedMeals.value = {};
+    portionSizes.value = {};
     allDays.forEach((day) => {
       updatedMeals.value[day] = plan.value.meals[day] || ""; // Use existing meal or leave it empty
+      portionSizes.value[day] = plan.value.portionSizes[day] || null; // Use existing portion size or null
     });
 
-    // Fetch all meals
     const mealsResponse = await api.get("/api/meals");
     meals.value = mealsResponse.data;
   } catch (error) {
@@ -73,9 +85,15 @@ const fetchPlanAndMeals = async () => {
 // Save the updated weekly plan
 const savePlan = async () => {
   try {
-    await api.put(`/api/create-weekly-plans/${planId}`, updatedMeals.value);
+    const payload = {
+      meals: updatedMeals.value,
+      portionSizes: portionSizes.value,
+    };
+
+    await api.put(`/api/create-weekly-plans/${planId}`, payload);
+
     alert("Weekly plan updated successfully!");
-    router.push("/view-weekly-plans"); // Redirect to weekly plans
+    router.push("/view-weekly-plans");
   } catch (error) {
     console.error("Error saving weekly plan:", error);
     alert("Failed to save the weekly plan. Please try again.");
@@ -116,6 +134,11 @@ form {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 10px;
+}
+
+input[type="number"] {
+  width: 80px;
+  margin-left: 10px;
 }
 
 label {

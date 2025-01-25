@@ -7,7 +7,9 @@
 
     <!-- Create Meal Plan Button -->
     <div class="create-button">
-      <button @click="createWeeklyPlan" class="action-button">Create Meal Plan</button>
+      <button @click="createWeeklyPlan" class="action-button">
+        Create Meal Plan
+      </button>
     </div>
 
     <!-- Weekly Plans List -->
@@ -17,12 +19,20 @@
         <ul>
           <li v-for="(mealId, day) in plan.meals" :key="day">
             {{ day }}: {{ getMealName(mealId) }}
+            <span v-if="plan.portionSizes[day]">
+              | Portion Size: {{ plan.portionSizes[day] }}
+            </span>
           </li>
         </ul>
         <!-- Buttons for each plan -->
         <div class="button-container">
-          <button @click="deletePlan(plan.id)" class="action-button">Delete Plan</button>
-          <button @click="navigateToShoppingList(plan.id)" class="action-button">
+          <button @click="deletePlan(plan.id)" class="action-button">
+            Delete Plan
+          </button>
+          <button
+            @click="navigateToShoppingList(plan.id)"
+            class="action-button"
+          >
             Generate Shopping List
           </button>
           <button @click="navigateToEditPlan(plan.id)" class="action-button">
@@ -44,6 +54,7 @@ interface WeeklyPlan {
   id: number;
   week: number;
   meals: Record<string, number>;
+  portionSizes: Record<string, number>;
 }
 
 interface Meal {
@@ -59,12 +70,14 @@ const router = useRouter();
 async function fetchWeeklyPlans() {
   try {
     const response = await api.get("/api/create-weekly-plans");
-    weeklyPlans.value = response.data;
+    weeklyPlans.value = response.data.map((plan: WeeklyPlan) => ({
+      ...plan,
+      portionSizes: plan.portionSizes || {}, // Ensure portionSizes exists
+    }));
   } catch (error) {
     console.error("Error fetching weekly plans:", error);
   }
 }
-
 // Function to fetch meals
 async function fetchMeals() {
   try {
@@ -163,7 +176,7 @@ onMounted(async () => {
 
 .weekly-plan h2 {
   margin-bottom: 10px;
-  font-size: 1.rem;
+  font-size: 1rem;
   color: #28a745;
 }
 

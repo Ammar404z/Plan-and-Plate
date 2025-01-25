@@ -20,14 +20,24 @@
         <label :for="`meal-${day}`">{{ day }}</label>
         <select
           :id="`meal-${day}`"
-          v-model="selectedMeals[day]"
+          v-model="selectedMeals[day].mealId"
           class="meal-select"
         >
-          <!-- Dynamically populates the meal options for each day -->
           <option v-for="meal in savedMeals" :key="meal.id" :value="meal.id">
             {{ meal.name }}
           </option>
         </select>
+
+        <label :for="`portion-${day}`">Portion Size:</label>
+        <input
+          required
+          type="number"
+          :id="`portion-${day}`"
+          v-model="selectedMeals[day].portionSize"
+          class="portion-size-input"
+          min="1"
+          placeholder="Enter portion size"
+        />
       </div>
     </div>
 
@@ -51,7 +61,10 @@ interface Meal {
 
 // Interface for mapping days to selected meal IDs
 interface SelectedMeals {
-  [key: string]: number | null; // Day maps to either a meal ID or null
+  [key: string]: {
+    mealId: number | null; // Meal ID or null if not selected
+    portionSize: number; // Portion size, default to 1
+  };
 }
 
 // List of days of the week
@@ -72,7 +85,7 @@ const weeks: number[] = [1, 2, 3, 4];
 const savedMeals = ref<Meal[]>([]); // Array to store meals fetched from the API
 const selectedMeals = ref<SelectedMeals>(
   days.reduce((acc, day) => {
-    acc[day] = null; // Initialize each day with no meal selected
+    acc[day] = { mealId: null, portionSize: 1 }; // Initialize each day
     return acc;
   }, {} as SelectedMeals)
 );
@@ -90,15 +103,13 @@ onMounted(async (): Promise<void> => {
 
 // Function to save the weekly plan
 async function saveWeeklyPlan(): Promise<void> {
-  // Ensure a week is selected before saving
   if (!selectedWeek.value) {
     alert("Please select a week before saving the plan.");
     return;
   }
 
-  // Ensure at least one meal is assigned before saving
   const hasMeals = Object.values(selectedMeals.value).some(
-    (meal) => meal !== null
+    (meal) => meal.mealId !== null
   );
   if (!hasMeals) {
     alert("Please assign at least one meal before saving the plan.");
@@ -106,21 +117,30 @@ async function saveWeeklyPlan(): Promise<void> {
   }
 
   try {
-    // API call to save the weekly plan
-    const response = await api.post("/api/create-weekly-plans", {
-      week: selectedWeek.value, // Selected week
-      meals: selectedMeals.value, // Assigned meals
-    });
-    alert("Weekly plan saved successfully!"); // Confirmation message
-    console.log(response.data); // Log the response
-    router.push("/view-weekly-plans"); // Navigate to the weekly plans view
+    const payload = {
+      week: selectedWeek.value,
+      meals: Object.entries(selectedMeals.value)
+        .filter(([day, data]) => data.mealId !== null) // Only include days with selected meals
+        .reduce((acc, [day, data]) => {
+          acc[day] = data.mealId; // Map of day to mealId
+          return acc;
+        }, {}),
+      portionSizes: Object.entries(selectedMeals.value)
+        .filter(([day, data]) => data.mealId !== null) // Only include days with selected meals
+        .reduce((acc, [day, data]) => {
+          acc[day] = data.portionSize; // Map of day to portion size
+          return acc;
+        }, {}),
+    };
+    await api.post("/api/create-weekly-plans", payload);
+    alert("Weekly plan saved successfully!");
+    router.push("/view-weekly-plans");
   } catch (error: any) {
-    // Handle API errors
     if (error.response && error.response.status === 400) {
-      alert("Error: " + error.response.data); // Display specific error messages
+      alert("Error: " + error.response.data);
     } else {
-      console.error("Unexpected error:", error); // Log unexpected errors
-      alert("An unexpected error occurred."); // Show a generic error message
+      console.error("Unexpected error:", error);
+      alert("An unexpected error occurred.");
     }
   }
 }
@@ -240,5 +260,32 @@ button:disabled {
   .weekly-plan {
     padding: 20px;
   }
+}
+.portion-size-input {
+  width: 20%;
+  padding: 8px 10px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.portion-size-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+  outline: none;
+}
+
+.portion-size-input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+.portion-size-input:disabled {
+  background-color: #f5f5f5;
+  border-color: #ddd;
+  cursor: not-allowed;
 }
 </style>
