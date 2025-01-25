@@ -46,7 +46,7 @@
                2) Share (below, centered) -->
           <div class="button-row">
             <button
-              v-if="meal.custom === false"
+              v-if="meal.isCustom === false"
               class="meal-button"
               @click="saveRecipe(meal)"
             >
@@ -86,7 +86,7 @@ interface Meal {
   thumbnail: string;
   category: string;
   youTubeVid: string;
-  custom: boolean;
+  isCustom: boolean;
   [key: string]: any;
 }
 const router = useRouter();
@@ -250,6 +250,7 @@ async function fetchRandomMeal() {
       ingredients: extractIngredients(randomMeal),
       category: randomMeal.strCategory || "Unknown",
       youTubeVid: randomMeal.strYoutube || "",
+      isCustom: false, // Random meals are not custom by default
     };
 
     meals.value = [meal];
