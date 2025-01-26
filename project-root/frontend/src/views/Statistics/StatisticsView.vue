@@ -1,9 +1,7 @@
 <template>
   <div class="statistics-view">
-    <!-- Page Title -->
     <h1>Statistics</h1>
 
-    <!-- Section for displaying saved meals by category -->
     <h2>Saved Meals by Category</h2>
     <canvas id="categoryChart"></canvas>
     <!-- Chart to visualize the category distribution -->
@@ -25,19 +23,28 @@ import { onMounted, ref } from "vue";
 const categoryDistribution = ref({}); // Stores the distribution of saved meals by category
 const chartInstance = ref(null);
 const totalSavedCount = ref(0);
-// Lifecycle hook that runs when the component is mounted
+
+/**
+ * does the following on mount:
+ * - fetches the category distribution from the backend for the chart
+ * - assigns the fetched data to the reactive variables
+ * - initializes the pie chart with the category distribution
+ * - fetches the count of saved meals
+ * - assigns the fetched data to the reactive variables
+ * - displays the saved meals count
+ */
 onMounted(async () => {
   try {
-    // Fetch the category distribution data from the backend
     const distributionResponse = await api.get(
       "/api/statistics/category-distribution"
     );
-    categoryDistribution.value = distributionResponse.data; // Assign the fetched data to the reactive variable
+    categoryDistribution.value = distributionResponse.data;
 
     // Initialize the Pie Chart for visualizing category distribution
     const ctx = document.getElementById("categoryChart").getContext("2d"); // Get the canvas context
-    const categories = Object.keys(categoryDistribution.value); // Extract category names
-    const counts = Object.values(categoryDistribution.value); // Extract corresponding counts
+
+    const categories = Object.keys(categoryDistribution.value);
+    const counts = Object.values(categoryDistribution.value);
 
     // Create a new Chart.js instance
     chartInstance.value = new Chart(ctx, {
@@ -47,7 +54,7 @@ onMounted(async () => {
         datasets: [
           {
             label: "Saved Meals by Category",
-            data: counts, // Data points for the chart
+            data: counts,
             backgroundColor: [
               "#FF6384",
               "#36A2EB",
@@ -60,15 +67,14 @@ onMounted(async () => {
         ],
       },
       options: {
-        responsive: true, // Makes the chart responsive to screen size
+        responsive: true,
       },
     });
 
-    // Fetch the total saved recipes count from the backend
     const totalSavedResponse = await api.get(
       "/api/statistics/total-saved-count"
     );
-    totalSavedCount.value = totalSavedResponse.data; // Assign the fetched count to the reactive variable
+    totalSavedCount.value = totalSavedResponse.data;
   } catch (error) {
     // Log any errors that occur during data fetching
     console.error("Error fetching statistics:", error);
@@ -81,22 +87,22 @@ onMounted(async () => {
   margin: 0 auto;
   padding: 30px;
   text-align: center;
-  background-color: #f5f5f5; /* Light background */
+  background-color: #f5f5f5;
   border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .statistics-view h1 {
   font-size: 2rem;
   margin-bottom: 20px;
-  color: #333; /* Darker text for contrast */
+  color: #333;
   font-weight: bold;
 }
 
 .statistics-view h2 {
   font-size: 1.5rem;
   margin-bottom: 15px;
-  color: #555; /* Slightly lighter than the main heading */
+  color: #555;
 }
 
 ul {
@@ -128,7 +134,7 @@ li p strong {
   padding: 20px;
   margin-top: 30px;
   border-radius: 8px;
-  background-color: #e8f7ff; /* Light blue background */
+  background-color: #e8f7ff;
   border: 1px solid #cceeff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
 }

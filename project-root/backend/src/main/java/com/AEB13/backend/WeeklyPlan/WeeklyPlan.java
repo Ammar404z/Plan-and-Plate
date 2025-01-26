@@ -60,56 +60,26 @@ public class WeeklyPlan {
     @Column(name = "portion_size")
     private Map<String, Integer> portionSizes = new HashMap<>();
 
-    /**
-     * Retrieves the unique identifier of the weekly plan.
-     *
-     * @return the plan ID
-     */
     public Long getId() {
         return id;
     }
 
-    /**
-     * Sets the unique identifier of the weekly plan.
-     *
-     * @param id the plan ID to set
-     */
     public void setId(Long id) {
         this.id = id;
     }
 
-    /**
-     * Retrieves the week number for this plan.
-     *
-     * @return the week number
-     */
     public int getWeek() {
         return week;
     }
 
-    /**
-     * Sets the week number for this plan.
-     *
-     * @param week the week number to set
-     */
     public void setWeek(int week) {
         this.week = week;
     }
 
-    /**
-     * Retrieves the map of days to meal IDs for this plan.
-     *
-     * @return the mapping of days to meal IDs
-     */
     public Map<String, Long> getMeals() {
         return meals;
     }
 
-    /**
-     * Sets the map of days to meal IDs for this plan.
-     *
-     * @param meals the new mapping of days to meal IDs
-     */
     public void setMeals(Map<String, Long> meals) {
         this.meals = meals;
     }

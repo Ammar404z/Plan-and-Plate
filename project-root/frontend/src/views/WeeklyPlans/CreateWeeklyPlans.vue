@@ -62,8 +62,8 @@ interface Meal {
 // Interface for mapping days to selected meal IDs
 interface SelectedMeals {
   [key: string]: {
-    mealId: number | null; // Meal ID or null if not selected
-    portionSize: number; // Portion size, default to 1
+    mealId: number | null;
+    portionSize: number;
   };
 }
 
@@ -82,26 +82,28 @@ const days: string[] = [
 const weeks: number[] = [1, 2, 3, 4];
 
 // Reactive variables
-const savedMeals = ref<Meal[]>([]); // Array to store meals fetched from the API
+const savedMeals = ref<Meal[]>([]);
 const selectedMeals = ref<SelectedMeals>(
   days.reduce((acc, day) => {
-    acc[day] = { mealId: null, portionSize: 1 }; // Initialize each day
+    acc[day] = { mealId: null, portionSize: 1 };
     return acc;
   }, {} as SelectedMeals)
 );
-const selectedWeek = ref<number | null>(null); // Selected week, initially null
+const selectedWeek = ref<number | null>(null);
 
 // Lifecycle hook: Fetch meals when the component is mounted
 onMounted(async (): Promise<void> => {
   try {
-    const response = await api.get<Meal[]>("/api/meals"); // API call to fetch meals
-    savedMeals.value = response.data; // Store the fetched meals
+    const response = await api.get<Meal[]>("/api/meals");
+    savedMeals.value = response.data;
   } catch (error) {
-    console.error("Error loading saved meals:", error); // Log errors if any
+    console.error("Error loading saved meals:", error);
   }
 });
 
-// Function to save the weekly plan
+/**
+ * Function to save the weekly plan based on the user's selections
+ */
 async function saveWeeklyPlan(): Promise<void> {
   if (!selectedWeek.value) {
     alert("Please select a week before saving the plan.");
@@ -120,12 +122,14 @@ async function saveWeeklyPlan(): Promise<void> {
     const payload = {
       week: selectedWeek.value,
       meals: Object.entries(selectedMeals.value)
+        // eslint-disable-next-line
         .filter(([day, data]) => data.mealId !== null) // Only include days with selected meals
         .reduce((acc, [day, data]) => {
           acc[day] = data.mealId; // Map of day to mealId
           return acc;
         }, {}),
       portionSizes: Object.entries(selectedMeals.value)
+        // eslint-disable-next-line
         .filter(([day, data]) => data.mealId !== null) // Only include days with selected meals
         .reduce((acc, [day, data]) => {
           acc[day] = data.portionSize; // Map of day to portion size
@@ -145,7 +149,6 @@ async function saveWeeklyPlan(): Promise<void> {
   }
 }
 
-// Function to cancel and navigate back to the weekly plans view
 function cancel() {
   router.push("/view-weekly-plans");
 }

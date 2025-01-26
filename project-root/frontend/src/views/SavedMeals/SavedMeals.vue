@@ -91,9 +91,9 @@ interface Meal {
 }
 
 const meals = ref<Meal[]>([]);
-const searchQuery = ref(""); // Search query
-const sortOrder = ref("asc"); // Default sorting order
-const showFavoritesOnly = ref(false); // Filter state
+const searchQuery = ref("");
+const sortOrder = ref("asc");
+const showFavoritesOnly = ref(false);
 const router = useRouter();
 
 function navigateToAddMeal() {
@@ -104,7 +104,9 @@ async function watchYouTubeVid(youTubeVid: string) {
   window.open(youTubeVid, "_blank");
 }
 
-// Fetch saved meals on component mount
+/**
+ * Fetch saved meals on component mount
+ */
 async function fetchMeals() {
   try {
     const response = await api.get("/api/meals");
@@ -144,12 +146,13 @@ async function toggleFavorite(meal: Meal) {
   }
 }
 
-// Method to toggle sorting order
 function toggleSortOrder() {
   sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
 }
 
-// Computed property to filter and sort meals
+/**
+ *  Computed property to filter and sort meals
+ */
 const sortedMeals = computed(() => {
   let filtered = meals.value;
 
@@ -194,11 +197,11 @@ onMounted(fetchMeals);
 .title-box {
   font-size: 1.2rem;
   padding: 15px 20px;
-  background-color: #e3f6e8; /* Lighter green background */
-  color: #28a745; /* Green text */
-  border: 2px solid #89cff0; /* Similar to dropdown */
-  border-radius: 10px; /* Similar to dropdown */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Similar to dropdown */
+  background-color: #e3f6e8;
+  color: #28a745;
+  border: 2px solid #89cff0;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -220,9 +223,9 @@ onMounted(fetchMeals);
 }
 
 .add-meal-btn {
-  background-color: #e3f6e8; /* Light green background */
+  background-color: #e3f6e8;
   font-size: 1.2rem;
-  color: #28a745; /* Green text */
+  color: #28a745;
   border: 2px solid #89cff0;
   padding: 15px 20px;
   cursor: pointer;
@@ -310,10 +313,10 @@ onMounted(fetchMeals);
 .meal-list {
   list-style: none;
   padding: 0;
-  display: flex; /* Use flex layout for vertical alignment */
-  flex-wrap: wrap; /* Allow multiple rows */
-  gap: 20px; /* Add spacing between meal cards */
-  justify-content: center; /* Center-align meals */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
 }
 
 /* Meal Card */

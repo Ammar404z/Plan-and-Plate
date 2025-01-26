@@ -61,7 +61,9 @@ const allDays = [
   "Sunday",
 ];
 
-// Fetch the weekly plan and available meals
+/**
+ * fetches the weekly plans to display
+ */
 const fetchPlanAndMeals = async () => {
   try {
     const planResponse = await api.get(`/api/create-weekly-plans/${planId}`);
@@ -100,7 +102,6 @@ const savePlan = async () => {
   }
 };
 
-// Cancel editing and go back to weekly plans
 const cancelEdit = () => {
   router.push("/view-weekly-plans");
 };

@@ -1,8 +1,6 @@
 <template>
   <div class="view-meal">
-    <!-- Meal Header Section -->
     <div class="meal-header">
-      <!-- Thumbnail Section -->
       <div class="thumbnail-section">
         <!-- Meal Thumbnail -->
         <img
@@ -10,7 +8,7 @@
           alt="Meal Thumbnail"
           class="meal-thumbnail"
         />
-        <!-- Meal Name and Category -->
+
         <p class="meal-category">{{ meal.name }}</p>
         <p class="meal-category">Category: {{ meal.category }}</p>
         <!-- Button to watch YouTube video -->
@@ -115,16 +113,13 @@
 </template>
 
 <script setup lang="ts">
-// Import necessary modules and dependencies
-import api from "@/api"; // API helper for backend requests
-import { onMounted, ref } from "vue"; // Vue composition API for reactivity
-import { useRoute, useRouter } from "vue-router"; // Vue router for navigation
+import api from "@/api";
+import { onMounted, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-// Get route and router instances
 const route = useRoute();
 const router = useRouter();
 
-// Extract meal ID from route parameters
 const mealId = route.params.id;
 
 // Reactive variables
@@ -182,12 +177,14 @@ function extractIngredients(data) {
   return ingredients;
 }
 
-// Save the recipe to the backend
+/**
+ * Save the recipe to the backend, map the api meal to the local structure of meals
+ * ensure that the api id is saved since we will be using it later
+ */
 async function saveRecipe() {
   try {
-    // Map the meal data to the recipe payload
     const recipe = {
-      apiId: meal.value.apiId, // Ensure the API ID is saved if relevant
+      apiId: meal.value.apiId,
       name: meal.value.name,
       ingredients: meal.value.ingredients
         .map((ingredient) => `${ingredient.name} - ${ingredient.measure}`)
@@ -195,11 +192,10 @@ async function saveRecipe() {
       instructions: meal.value.instructions || "No instructions available.",
       thumbnail: meal.value.thumbnail,
       category: meal.value.category || "Unknown",
-      youTubeVid: meal.value.youTubeVid || "", // Save the link for additional features
+      youTubeVid: meal.value.youTubeVid || "",
     };
 
     // Send the recipe to the backend
-
     const response = await api.post("/api/meals/add", recipe);
     alert(`Recipe "${response.data.name}" saved successfully.`);
   } catch (error: any) {
@@ -213,15 +209,16 @@ async function saveRecipe() {
   }
 }
 
-// Toggle the share modal visibility
 function toggleShareModal() {
   isShareModalVisible.value = !isShareModalVisible.value;
 }
 
-// Copy the share link to the clipboard
+/**
+ * copies the link of the recipe to the clipboard, uses the modern clipboard api
+ *
+ */
 function copyLink() {
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    // Modern Clipboard API
     navigator.clipboard
       .writeText(shareLink)
       .then(() => alert("Link copied to clipboard!"))
@@ -254,12 +251,10 @@ function copyLink() {
   }
 }
 
-// Navigate back to the previous page
 function goBack() {
   router.push("/");
 }
 
-// Open the YouTube video in a new tab
 async function watchYouTubeVid(youTubeVid: string) {
   window.open(youTubeVid, "_blank");
 }

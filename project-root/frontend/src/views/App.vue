@@ -1,12 +1,8 @@
 <template>
   <div id="app">
     <header class="header">
-      <img
-          src="@/assets/supermarket.png"
-          alt="Supermarket Logo"
-          class="logo"
-      />
-      <h1 class="app-title">Weekly Meal Planner</h1>
+      <img src="@/assets/supermarket.png" alt="Supermarket Logo" class="logo" />
+      <h1 class="app-title">Plan & Plate</h1>
     </header>
 
     <!-- Add a gradient background for the nav section -->
@@ -14,34 +10,26 @@
       <nav class="nav-bar">
         <router-link to="/" class="nav-button">
           <img
-              src="@/assets/pngegg (2).png"
-              alt="Search Recipes"
-              class="nav-icon"
+            src="@/assets/pngegg (2).png"
+            alt="Search Recipes"
+            class="nav-icon"
           />
           <span>Search Recipes</span>
         </router-link>
         <router-link to="/saved-meals" class="nav-button">
-          <img
-              src="@/assets/food.png"
-              alt="Saved Meals"
-              class="nav-icon"
-          />
+          <img src="@/assets/food.png" alt="Saved Meals" class="nav-icon" />
           <span>Saved Meals</span>
         </router-link>
         <router-link to="/view-weekly-plans" class="nav-button">
           <img
-              src="@/assets/nutrition-plan.png"
-              alt="Weekly Plans"
-              class="nav-icon"
+            src="@/assets/nutrition-plan.png"
+            alt="Weekly Plans"
+            class="nav-icon"
           />
           <span>Weekly Plans</span>
         </router-link>
         <router-link to="/statistics" class="nav-button">
-          <img
-              src="@/assets/portion.png"
-              alt="Statistics"
-              class="nav-icon"
-          />
+          <img src="@/assets/portion.png" alt="Statistics" class="nav-icon" />
           <span>Statistics</span>
         </router-link>
       </nav>
@@ -60,37 +48,35 @@ export default {
 <style>
 /* HEADER */
 .header {
-  background-color: #89cff0; /* Light blue */
+  background-color: #89cff0;
   display: flex;
-  align-items: center; /* Center items vertically */
-  justify-content: center; /* Center items horizontally */
+  align-items: center;
+  justify-content: center;
   padding: 0.5rem 1.5rem;
-  height: 100px; /* Increase height slightly for more space */
-  box-sizing: border-box; /* Includes padding in height calculation */
+  height: 100px;
+  box-sizing: border-box;
 }
 
 .logo {
   height: 60px; /* Make the logo slightly larger */
   width: auto; /* Maintain aspect ratio */
-  margin-right: 1rem; /* Space between logo and title */
-
+  margin-right: 1rem;
 }
 
 .app-title {
-  font-size: 2.2rem; /* Slightly increase font size */
-  font-weight: 700; /* Keep bold text */
+  font-size: 2.2rem;
+  font-weight: 700;
 }
-
 
 /* General Styling for Navigation Bar */
 /* NAV BACKGROUND */
 .nav-background {
   background: linear-gradient(
-      to bottom,
-      #89cff0 50%,
-      #ffffff 50%
+    to bottom,
+    #89cff0 50%,
+    #ffffff 50%
   ); /* Top: Light blue, Bottom: White */
-  padding: 2rem 0; /* Extra padding for spacing */
+  padding: 2rem 0;
 }
 
 /* NAVIGATION BAR */
@@ -108,14 +94,14 @@ export default {
   align-items: center;
   justify-content: center;
   text-decoration: none; /* Remove underlines */
-  background-color: #f9f9f9; /* Light background for buttons */
+  background-color: #f9f9f9;
   padding: 1rem;
   border-radius: 10px;
-  width: 120px; /* Fixed width for consistent box sizes */
-  height: 120px; /* Fixed height for consistent box sizes */
+  width: 120px;
+  height: 120px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
-  font-size: 1rem; /* Adjust text size */
+  font-size: 1rem;
   color: #333; /* Default text color */
   text-align: center;
 }

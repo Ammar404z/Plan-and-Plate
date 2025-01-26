@@ -62,14 +62,17 @@ const meal = ref({
   category: "",
 });
 
-// Fetch custom meal details on mount
+/**
+ * Fetch custom meal details on mount, make sure we map the api data to the
+ * local meal structure correctly, and redirect back to the custom meal list
+ * if we encounter an error
+ */
 onMounted(async () => {
   try {
     const response = await api.get(`/api/meals/${mealId}`);
     console.log(response);
     const data = response.data;
 
-    // Map API data to local meal structure
     meal.value = {
       id: data.id,
       name: data.name,
@@ -81,11 +84,10 @@ onMounted(async () => {
   } catch (error) {
     console.error("Error fetching custom meal details:", error);
     alert("Failed to fetch meal details.");
-    router.push("/"); // Redirect back to the custom meal list if there's an error
+    router.push("/");
   }
 });
 
-// Navigate back to the previous page
 function goBack() {
   router.push("/");
 }

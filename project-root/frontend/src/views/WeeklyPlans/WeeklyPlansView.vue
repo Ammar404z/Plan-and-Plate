@@ -66,7 +66,9 @@ const weeklyPlans = ref<WeeklyPlan[]>([]);
 const meals = ref<Meal[]>([]);
 const router = useRouter();
 
-// Function to fetch weekly plans
+/**
+ * Function to fetch weekly plans
+ */
 async function fetchWeeklyPlans() {
   try {
     const response = await api.get("/api/create-weekly-plans");
@@ -78,7 +80,10 @@ async function fetchWeeklyPlans() {
     console.error("Error fetching weekly plans:", error);
   }
 }
-// Function to fetch meals
+
+/**
+ * Function to fetch meals
+ */
 async function fetchMeals() {
   try {
     const response = await api.get("/api/meals");
@@ -88,13 +93,17 @@ async function fetchMeals() {
   }
 }
 
-// Function to get meal name by ID
+/**
+ * Function to get meal name by ID
+ */
 function getMealName(mealId: number): string {
   const meal = meals.value.find((meal) => meal.id === mealId);
   return meal ? meal.name : "Unknown Meal";
 }
 
-// Function to delete a weekly plan
+/**
+ * Function to delete a weekly plan
+ */
 async function deletePlan(planId: number) {
   try {
     await api.delete(`/api/create-weekly-plans/${planId}`);
@@ -106,12 +115,17 @@ async function deletePlan(planId: number) {
   }
 }
 
-// Function to navigate to the create meal plan page
+/**
+ * Function to navigate to the create meal plan page
+ */
 function createWeeklyPlan() {
   router.push("/create-weekly-plans");
 }
 
-// Function to navigate to the Shopping List View
+/**
+ * Function to navigate to the Shopping List View
+ * @param planId the id of the shoppinglist
+ */
 function navigateToShoppingList(planId: number) {
   router.push({
     path: `/shopping-list/${planId}`, // Include `planId` in the path
@@ -122,7 +136,9 @@ function navigateToEditPlan(planId: number) {
   router.push(`/create-weekly-plans/${planId}`);
 }
 
-// Fetch data on component mount
+/**
+ * Fetch data on component mount
+ */
 onMounted(async () => {
   await fetchMeals();
   await fetchWeeklyPlans();
@@ -143,11 +159,11 @@ onMounted(async () => {
 .title-box {
   font-size: 1.2rem;
   padding: 15px 20px;
-  background-color: #e3f6e8; /* Lighter green background */
-  color: #28a745; /* Green text */
-  border: 2px solid #89cff0; /* Similar to dropdown */
-  border-radius: 10px; /* Similar to dropdown */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Similar to dropdown */
+  background-color: #e3f6e8;
+  color: #28a745;
+  border: 2px solid #89cff0;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -200,23 +216,23 @@ onMounted(async () => {
 
 /* Button Styling */
 .action-button {
-  background-color: #e3f6e8; /* Light green background */
-  color: #28a745; /* Green text */
+  background-color: #e3f6e8;
+  color: #28a745;
   border: 2px solid #89cff0;
   border-radius: 10px;
   padding: 10px 20px; /* Uniform padding */
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin: 5px; /* Space between buttons */
-  width: 200px; /* Set uniform width for all buttons */
+  margin: 5px;
+  width: 200px;
   text-align: center;
   display: inline-block;
 }
 
 .action-button:hover {
-  background-color: #218838; /* Darker green */
-  color: white; /* White text */
+  background-color: #218838;
+  color: white;
   transform: translateY(-2px); /* Lift effect */
 }
 
@@ -234,10 +250,10 @@ button:disabled {
 .create-button button {
   font-size: 1.2rem;
   padding: 15px 20px;
-  font-weight: bold; /* Add this to make the font thick (bold) */
-  background-color: #e3f6e8; /* Light green background */
-  color: #28a745; /* Green text */
-  border: 2px solid #89cff0; /* Border matching dropdown buttons */
+  font-weight: bold;
+  background-color: #e3f6e8;
+  color: #28a745;
+  border: 2px solid #89cff0;
   border-radius: 10px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;

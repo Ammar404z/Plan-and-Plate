@@ -121,10 +121,11 @@ onMounted(() => {
    Functions
 ----------------------------- */
 
-// fetch the filters to be displayed in the dropdown menu
+/**
+ *  fetch the filters to be displayed in the dropdown menu
+ */
 async function fetchFilters() {
   try {
-    // Fetch combined categories and areas from the backend
     const response = await api.get("/api/meals/categoriesAndAreas");
     combinedFilters.value = response.data.filters.map((filter: any) => ({
       type: filter.type,
@@ -135,6 +136,9 @@ async function fetchFilters() {
   }
 }
 
+/**
+ * search and filter logic
+ */
 async function applyFiltersAndSearch() {
   try {
     const params = new URLSearchParams();
@@ -199,11 +203,16 @@ function extractIngredients(meal: any): string {
     : "No ingredients available.";
 }
 
+/**
+ * saves the specified meal to the database(saved meals)
+ *
+ * Fetch full meal details by id from the backend or API(we have to do that because
+ * the filtered meals for example don't contain the full meal details)
+ *
+ * @param meal the meal to save
+ */
 async function saveRecipe(meal: Meal) {
   try {
-    // Fetch full meal details by id from the backend or API(we have to do that because
-    // the filtered meals for example don't contain the full meal details)
-
     const response = await api.get(
       `https://www.themealdb.com/api/json/v1/1/lookup.php?i=${meal.id}`
     );
@@ -235,6 +244,9 @@ async function saveRecipe(meal: Meal) {
   }
 }
 
+/**
+ * fetch a random meal from the api, maps the api meal to the local meal structure
+ */
 async function fetchRandomMeal() {
   try {
     const response = await api.get(
@@ -261,6 +273,12 @@ async function fetchRandomMeal() {
   }
 }
 
+/**
+ * navigates to the meal view, handles the case where the meal is custom
+ *
+ * @param mealId the id of meal to navigate to
+ * @param isCustom if the meal is custom, we approach differently
+ */
 async function viewMeal(mealId: string, isCustom: boolean) {
   console.log("Meal ID:", mealId, "Is Custom:", isCustom);
   if (isCustom) {
@@ -423,25 +441,23 @@ h1 {
   margin-bottom: 10px;
 }
 
-/* Center the Share button below the button row */
 .share-row {
   display: flex;
-  justify-content: center; /* Center align the Share button */
+  justify-content: center;
   margin-top: 10px; /* Add space above the Share button */
 }
 
-/* Match the color scheme of the Random Meal button for Save/View/Share */
 .meal-button,
 .meal-share-button {
   font-size: 1rem;
   padding: 10px;
-  background-color: #e3f6e8; /* Lighter green background */
-  color: #28a745; /* Green text */
+  background-color: #e3f6e8;
+  color: #28a745;
   border: 2px solid #89cff0;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
-  width: 110px; /* Slight fixed width so each button is balanced */
+  width: 110px;
   text-align: center; /* Center text on each button */
 }
 

@@ -89,11 +89,12 @@
 </template>
 
 <script setup lang="ts">
-import api from "@/api"; // API module for backend requests
-import { ref } from "vue"; // Vue's reactive state management
-import { useRouter } from "vue-router"; // Vue Router for navigation
+import api from "@/api";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-const router = useRouter(); // Router instance for navigation
+const router = useRouter();
+
 // Reactive state for meal details
 const meal = ref({
   name: "",
@@ -114,12 +115,16 @@ function addIngredient() {
   ingredients.value.push({ name: "", quantity: "", unit: "" });
 }
 
-// Remove an ingredient row by index
+/**
+ *  Remove an ingredient row by index
+ */
 function removeIngredient(index: number) {
   ingredients.value.splice(index, 1);
 }
 
-// Combine the ingredients into the desired format for backend submission
+/**
+ * Combine the ingredients into the desired format for backend submission
+ */
 function combineIngredients(): string {
   return ingredients.value
     .map(
@@ -129,15 +134,12 @@ function combineIngredients(): string {
     .join(", ");
 }
 
-// Validate the thumbnail URL to ensure it's a valid HTTPS link
 function validateThumbnailUrl(url: string): boolean {
   return url.startsWith("https://");
 }
 
-// Submit the meal form
 async function addMeal() {
   try {
-    // Combine ingredients into the expected string format
     meal.value.ingredients = combineIngredients();
 
     // Ensure all fields are properly filled

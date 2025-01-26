@@ -50,13 +50,20 @@ public class MealController {
     @Autowired
     private MealService mealService;
 
+    /*
+     * gets a meal from the database using its id
+     * 
+     * @param meal the Meal object to be added
+     * 
+     * @return the saved Meal entity or an error response if it already exists
+     */
     @GetMapping("/api/meals/{id}")
     public ResponseEntity<Meal> getMealById(@PathVariable Long id) {
-        Optional<Meal> meal = mealRepository.findById(id); // Fetch meal by ID
+        Optional<Meal> meal = mealRepository.findById(id);
         if (meal.isPresent()) {
-            return ResponseEntity.ok(meal.get()); // Return the meal if found
+            return ResponseEntity.ok(meal.get());
         } else {
-            return ResponseEntity.notFound().build(); // Return 404 if not found
+            return ResponseEntity.notFound().build();
         }
     }
 

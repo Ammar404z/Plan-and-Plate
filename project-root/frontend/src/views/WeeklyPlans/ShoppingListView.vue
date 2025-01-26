@@ -58,19 +58,22 @@ interface Ingredient {
 interface Meal {
   day: string;
   mealName: string;
-  scalingFactor: number; // Portion size for the meal
-  ingredients: Ingredient[]; // List of ingredients for the meal
+  scalingFactor: number;
+  ingredients: Ingredient[];
 }
 
 // Reactive variables for storing data
-const shoppingList = ref<Meal[]>([]); // Array of meals in the shopping list
-const skippedMeals = ref<string[]>([]); // Days with skipped meals
-const route = useRoute(); // Get route information
+const shoppingList = ref<Meal[]>([]);
+const skippedMeals = ref<string[]>([]);
+const route = useRoute();
 
-// Fetch the shopping list data from the backend
+/**
+ * Fetch the shopping list data from the backend and extracts the skipped meals, if any exist
+ * maps the meals to the meal format of the frontend
+ */
 async function fetchShoppingList() {
   try {
-    const planId = route.params.planId; // Get the plan ID from the route
+    const planId = route.params.planId;
     if (!planId) {
       console.error("Plan ID is undefined. Cannot fetch shopping list.");
       return;
@@ -80,10 +83,8 @@ async function fetchShoppingList() {
     const response = await api.get(`/api/shopping-list/${planId}`);
     console.log("Backend Response:", response.data);
 
-    // Extract skipped meals, if any
     skippedMeals.value = response.data.skippedMeals || [];
 
-    // Map the ingredients to a format suitable for the frontend
     shoppingList.value = Object.entries(response.data.ingredients).map(
       ([name, quantity]) => ({
         name,
@@ -96,19 +97,19 @@ async function fetchShoppingList() {
   }
 }
 
-// Generate the thumbnail URL for an ingredient
 function getIngredientThumbnail(ingredientName: string): string {
   const formattedName = ingredientName.split(" (")[0].trim(); // Remove extra details
   return `https://www.themealdb.com/images/ingredients/${formattedName}.png`;
 }
 
-// Set a default thumbnail for ingredients without a valid image
 function setDefaultThumbnail(event: Event): void {
   const target = event.target as HTMLImageElement;
   target.src = require("@/assets/grocery.png"); // Fallback image
 }
 
-// Fetch the shopping list when the component is mounted
+/**
+ * Fetch the shopping list when the component is mounted
+ */
 onMounted(() => {
   fetchShoppingList();
 });
