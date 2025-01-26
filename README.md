@@ -1,4 +1,4 @@
-# Recipe Search App
+# Meal planner App: Plan & Plate
 
 http://193.196.52.222:8081/
 
@@ -161,7 +161,7 @@ This is a full-stack recipe search application that enables users to search for,
 
 ### Database Configuration
 
-Ensure the MariaDB database is running locally. Update the database credentials in the `application.properties` file located in the `backend/src/main/resources` directory(you can also use the default credentials like in this project. Username:root, Password:root. If you do so, then there is no need to edit the application.properties file).
+Ensure the MariaDB database is running locally. Update the database credentials in the `application.properties` file located in the `backend/src/main/resources` directory(you can also use the default credentials like in this project. Username:root, Password:root, Database on Port: 3306, Database name: SoPra. If you do so, then there is no need to edit the application.properties file).
 
 ### Accessing the Application
 
