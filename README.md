@@ -2,21 +2,9 @@
 
 This is a full-stack recipe search application that enables users to search for, save, and manage recipes, as well as generate weekly meal plans and shopping lists. It consists of a **Spring Boot** backend and a **Vue.js** frontend, using **TheMealDB API** to fetch recipe data.
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-![Uploading image.png…]()
-
----
-=======
 # Preview
 
 ![App Preview](./image/preview.png)
->>>>>>> Stashed changes
-=======
-# Preview
-
-![App Preview](./image/preview.png)
->>>>>>> Stashed changes
 
 ## Core Features
 
