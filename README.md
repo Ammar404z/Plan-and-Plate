@@ -4,7 +4,7 @@ This is a full-stack recipe search application that enables users to search for,
 
 # Preview
 
-![App Preview](./image/preview.png)
+![App Preview](./images/preview.png)
 
 ## Core Features
 
