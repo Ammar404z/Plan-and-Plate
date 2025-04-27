@@ -1,7 +1,5 @@
 # Meal planner App: Plan & Plate
 
-http://193.196.52.222:8081/
-
 This is a full-stack recipe search application that enables users to search for, save, and manage recipes, as well as generate weekly meal plans and shopping lists. It consists of a **Spring Boot** backend and a **Vue.js** frontend, using **TheMealDB API** to fetch recipe data.
 
 ---
@@ -169,4 +167,4 @@ Ensure the MariaDB database is running locally. Update the database credentials 
 
 ---
 
-For further assistance, contact: st188386@stud.uni-stuttgart.de.
+For further assistance, contact: ammarhassnou@gmail.com
